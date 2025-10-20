@@ -1,17 +1,27 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS4 (Global, Auto-Clear + Policy Type)
+// @name         Brainly Moderation Panel PLUS5 (Login Aware + Remote Toggle)
 // @namespace    http://tampermonkey.net/
-// @version      1.3
-// @description  Her sayfada taşınabilir panel, uzaktan kapatma destekli sürüm.
+// @version      1.4
+// @description  Taşınabilir panel, giriş ekranında durur, uzaktan kapatma desteklidir.
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
 
 (async () => {
- const conf = await fetch(`https://raw.githubusercontent.com/Galaxynovas09/brainly-automation-suite/main/config.json?cache_bust=${Date.now()}`, { cache: "no-store" }).then(r => r.json()).catch(()=>({ enabled: true }));
+  const confUrl = "https://raw.githubusercontent.com/Galaxynovas09/brainly-automation-suite/main/config.json";
+  const conf = await fetch(confUrl, { cache: "no-store", mode: "cors" })
+    .then(r => r.json())
+    .catch(() => ({ enabled: true }));
+
   if (!conf.enabled) {
     console.log("⛔ Panel disabled remotely");
+    return;
+  }
+
+  // 🔹 Giriş sayfasıysa çalışmayı durdur
+  if (document.title.includes("Sign in") || document.querySelector("form[action*='sign_in']")) {
+    console.log("⏸ Login page detected, panel paused.");
     return;
   }
 
@@ -110,16 +120,15 @@
           const params = `&bm_user=${encodeURIComponent(user)}&bm_action=${encodeURIComponent(action)}&bm_policy=${encodeURIComponent(policy)}&bm_market=${encodeURIComponent(market)}`;
           const url = base + params;
 
-          const w = window.open(url, '_blank');
-          if(!w){
-              status.textContent = '❌ Pop-up engellendi — tarayıcı izin verin.';
-              return;
-          }
-
-          document.getElementById('bm_user_link').value = '';
-          status.textContent = `✅ Gönderildi: ${user}\nYeni link girebilirsiniz.`;
-
-          setTimeout(() => document.getElementById('bm_user_link').focus(), 300);
+          setTimeout(()=>{  // gecikme ekledik (çakışmayı önler)
+              const w = window.open(url, '_blank');
+              if(!w){
+                  status.textContent = '❌ Pop-up engellendi — tarayıcı izin verin.';
+                  return;
+              }
+              document.getElementById('bm_user_link').value = '';
+              status.textContent = `✅ Gönderildi: ${user}\nYeni link girebilirsiniz.`;
+          }, 300);
       });
   })();
 })();
