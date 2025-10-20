@@ -1,25 +1,34 @@
 // ==UserScript==
-// @name         Brainly Trust & Safety Auto Filler PLUS5 (Login Aware + Remote Toggle)
+// @name         Brainly Trust & Safety Auto Filler FINAL (Silent + Remote Toggle)
 // @namespace    http://tampermonkey.net/
-// @version      1.9
-// @description  Panelden gelen policy ve bilgileri otomatik doldurur. Giriş ekranında durur, uzaktan kapatma desteklidir.
+// @version      2.0
+// @description  Formu otomatik doldurur, uzaktan kapatma destekli. Login sayfasında çalışmaz, JSON sekmesi açılmaz.
 // @match        https://brainly-trustandsafety.zendesk.com/hc/*/requests/new*
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
 
 (async () => {
-  const confUrl = "https://raw.githubusercontent.com/Galaxynovas09/brainly-automation-suite/main/config.json";
-  const conf = await fetch(confUrl, { cache: "no-store", mode: "cors" })
-    .then(r => r.json())
-    .catch(() => ({ enabled: true }));
+  // 🔹 Sessiz modda config.json kontrolü
+  let conf = { enabled: true };
+  try {
+    const response = await fetch("https://raw.githubusercontent.com/Galaxynovas09/brainly-automation-suite/main/config.json", {
+      cache: "no-store",
+      mode: "cors",
+      credentials: "omit"
+    });
+    if (response.ok) conf = await response.json();
+    else console.warn("⚠️ Config yüklenemedi, varsayılan açık durumda çalışıyor.");
+  } catch (e) {
+    console.warn("⚠️ Config fetch başarısız, script varsayılan açık durumda çalışıyor.");
+  }
 
   if (!conf.enabled) {
     console.log("⛔ Form filler disabled remotely");
     return;
   }
 
-  // 🔹 Eğer giriş sayfasındaysa script durdur
+  // 🔹 Giriş sayfasında çalışmayı durdur
   if (document.title.includes("Sign in") || document.querySelector("form[action*='sign_in']")) {
     console.log("⏸ Login page detected, script paused.");
     return;
