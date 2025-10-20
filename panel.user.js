@@ -2,7 +2,7 @@
 // @name         Brainly Moderation Panel PLUS4 (Global, Auto-Clear + Policy Type)
 // @namespace    http://tampermonkey.net/
 // @version      1.0
-// @description  Her sayfada taşınabilir panel, uzaktan kontrol kaldırılmış sürüm.
+// @description  Her sayfada taşınabilir panel
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
