@@ -2,11 +2,20 @@
 // @name         Brainly Trust & Safety Auto Filler PLUS4 (Dynamic Policy + Warning=Yes + Other)
 // @namespace    http://tampermonkey.net/
 // @version      1.7
-// @description  Panelden gelen policy ve diğer bilgileri otomatik doldurur, Warning given = Yes yapar ve formu gönderir. "Other" seçeneği dahil.
+// @description  Panelden gelen policy ve diğer bilgileri otomatik doldurur, Warning given = Yes yapar ve formu gönderir.
 // @match        https://brainly-trustandsafety.zendesk.com/hc/*/requests/new*
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
+
+// 🔹 Uzaktan kontrol (Github config.json)
+(async () => {
+  const conf = await fetch("https://raw.githubusercontent.com/<kullanıcıAdın>/brainly-automation-suite/main/config.json").then(r=>r.json());
+  if (!conf.enabled) {
+    console.log("⛔ Auto Filler disabled remotely");
+    return;
+  }
+})();
 
 (function(){
     'use strict';
