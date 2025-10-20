@@ -8,6 +8,15 @@
 // @run-at       document-idle
 // ==/UserScript==
 
+// 🔹 Uzaktan kontrol (Github config.json)
+(async () => {
+  const conf = await fetch("https://raw.githubusercontent.com/<kullanıcıAdın>/brainly-automation-suite/main/config.json").then(r=>r.json());
+  if (!conf.enabled) {
+    console.log("⛔ Panel disabled remotely");
+    return;
+  }
+})();
+
 (function(){
     'use strict';
 
