@@ -9,7 +9,7 @@
 // ==/UserScript==
 
 (async () => {
-  const conf = await fetch("https://raw.githubusercontent.com/Galaxynovas09/brainly-automation-suite/main/config.json").then(r => r.json());
+  const conf = await fetch(`https://raw.githubusercontent.com/Galaxynovas09/brainly-automation-suite/main/config.json?cache_bust=${Date.now()}`, { cache: "no-store" }).then(r => r.json()).catch(()=>({ enabled: true }));
   if (!conf.enabled) {
     console.log("⛔ Form filler disabled remotely");
     return;
