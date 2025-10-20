@@ -1,17 +1,27 @@
 // ==UserScript==
-// @name         Brainly Trust & Safety Auto Filler PLUS4 (Dynamic Policy + Warning=Yes + Other)
+// @name         Brainly Trust & Safety Auto Filler PLUS5 (Login Aware + Remote Toggle)
 // @namespace    http://tampermonkey.net/
-// @version      1.8
-// @description  Panelden gelen policy ve diğer bilgileri otomatik doldurur, uzaktan kapatma destekli sürüm.
+// @version      1.9
+// @description  Panelden gelen policy ve bilgileri otomatik doldurur. Giriş ekranında durur, uzaktan kapatma desteklidir.
 // @match        https://brainly-trustandsafety.zendesk.com/hc/*/requests/new*
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
 
 (async () => {
-  const conf = await fetch(`https://raw.githubusercontent.com/Galaxynovas09/brainly-automation-suite/main/config.json?cache_bust=${Date.now()}`, { cache: "no-store" }).then(r => r.json()).catch(()=>({ enabled: true }));
+  const confUrl = "https://raw.githubusercontent.com/Galaxynovas09/brainly-automation-suite/main/config.json";
+  const conf = await fetch(confUrl, { cache: "no-store", mode: "cors" })
+    .then(r => r.json())
+    .catch(() => ({ enabled: true }));
+
   if (!conf.enabled) {
     console.log("⛔ Form filler disabled remotely");
+    return;
+  }
+
+  // 🔹 Eğer giriş sayfasındaysa script durdur
+  if (document.title.includes("Sign in") || document.querySelector("form[action*='sign_in']")) {
+    console.log("⏸ Login page detected, script paused.");
     return;
   }
 
@@ -93,7 +103,6 @@
               form.submit();
               history.replaceState(null, '', location.origin + location.pathname);
               console.log("✅ Form dolduruldu ve gönderildi. Policy:", selectedPolicy);
-
               return true;
           } catch(e){
               console.error("Fill error:", e);
