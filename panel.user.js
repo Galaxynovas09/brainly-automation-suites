@@ -1,25 +1,34 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Login Aware + Remote Toggle)
+// @name         Brainly Moderation Panel FINAL (Silent + Remote Toggle)
 // @namespace    http://tampermonkey.net/
-// @version      1.4
-// @description  Taşınabilir panel, giriş ekranında durur, uzaktan kapatma desteklidir.
+// @version      2.0
+// @description  Taşınabilir panel, giriş ekranında çalışmaz, JSON sekmesi açılmaz, uzaktan kapatma desteklidir.
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
 
 (async () => {
-  const confUrl = "https://raw.githubusercontent.com/Galaxynovas09/brainly-automation-suite/main/config.json";
-  const conf = await fetch(confUrl, { cache: "no-store", mode: "cors" })
-    .then(r => r.json())
-    .catch(() => ({ enabled: true }));
+  // 🔹 Sessiz modda config.json kontrolü
+  let conf = { enabled: true };
+  try {
+    const response = await fetch("https://raw.githubusercontent.com/Galaxynovas09/brainly-automation-suite/main/config.json", {
+      cache: "no-store",
+      mode: "cors",
+      credentials: "omit"
+    });
+    if (response.ok) conf = await response.json();
+    else console.warn("⚠️ Config yüklenemedi, varsayılan açık durumda çalışıyor.");
+  } catch (e) {
+    console.warn("⚠️ Config fetch başarısız, script varsayılan açık durumda çalışıyor.");
+  }
 
   if (!conf.enabled) {
     console.log("⛔ Panel disabled remotely");
     return;
   }
 
-  // 🔹 Giriş sayfasıysa çalışmayı durdur
+  // 🔹 Giriş sayfasında çalışmayı durdur
   if (document.title.includes("Sign in") || document.querySelector("form[action*='sign_in']")) {
     console.log("⏸ Login page detected, panel paused.");
     return;
@@ -120,7 +129,7 @@
           const params = `&bm_user=${encodeURIComponent(user)}&bm_action=${encodeURIComponent(action)}&bm_policy=${encodeURIComponent(policy)}&bm_market=${encodeURIComponent(market)}`;
           const url = base + params;
 
-          setTimeout(()=>{  // gecikme ekledik (çakışmayı önler)
+          setTimeout(()=>{  
               const w = window.open(url, '_blank');
               if(!w){
                   status.textContent = '❌ Pop-up engellendi — tarayıcı izin verin.';
