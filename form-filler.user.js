@@ -1,128 +1,103 @@
 // ==UserScript==
-// @name         Brainly Trust & Safety Auto Filler FINAL (Silent + Remote Toggle)
+// @name         Brainly Trust & Safety Auto Filler PLUS4 (Dynamic Policy + Warning=Yes + Other)
 // @namespace    http://tampermonkey.net/
-// @version      2.0
-// @description  Formu otomatik doldurur, uzaktan kapatma destekli. Login sayfasında çalışmaz, JSON sekmesi açılmaz.
+// @version      1.0
+// @description  Panelden gelen policy ve diğer bilgileri otomatik doldurur, uzaktan kontrol kaldırılmış sürüm.
 // @match        https://brainly-trustandsafety.zendesk.com/hc/*/requests/new*
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
 
-(async () => {
-  // 🔹 Sessiz modda config.json kontrolü
-  let conf = { enabled: true };
-  try {
-    const response = await fetch("https://raw.githubusercontent.com/Galaxynovas09/brainly-automation-suite/main/config.json", {
-      cache: "no-store",
-      mode: "cors",
-      credentials: "omit"
-    });
-    if (response.ok) conf = await response.json();
-    else console.warn("⚠️ Config yüklenemedi, varsayılan açık durumda çalışıyor.");
-  } catch (e) {
-    console.warn("⚠️ Config fetch başarısız, script varsayılan açık durumda çalışıyor.");
-  }
+(function(){
+    'use strict';
 
-  if (!conf.enabled) {
-    console.log("⛔ Form filler disabled remotely");
-    return;
-  }
+    const fixedEmail = "glaxyserver@gmail.com";
 
-  // 🔹 Giriş sayfasında çalışmayı durdur
-  if (document.title.includes("Sign in") || document.querySelector("form[action*='sign_in']")) {
-    console.log("⏸ Login page detected, script paused.");
-    return;
-  }
+    function getParam(name){
+        const u = new URL(location.href);
+        return u.searchParams.get(name);
+    }
 
-  (function(){
-      'use strict';
+    const bm_user   = getParam('bm_user');
+    const bm_action = getParam('bm_action') || 'action_taken_moderators_banned_the_user';
+    const bm_market = getParam('bm_market') || 'turkey_clone';
+    const bm_policy = getParam('bm_policy') || 'benzerlik_spami';
 
-      const fixedEmail = "glaxyserver@gmail.com";
+    const userProfile = bm_user ? decodeURIComponent(bm_user) : '';
+    const actionTaken = decodeURIComponent(bm_action);
+    const market      = decodeURIComponent(bm_market);
+    const policyKey   = decodeURIComponent(bm_policy);
 
-      function getParam(name){
-          const u = new URL(location.href);
-          return u.searchParams.get(name);
-      }
+    const policyMap = {
+        spam: "policy_violation_spam",
+        ticari_spam: "policy_violation_commercial_spam",
+        kufur: "policy_violation_profanity",
+        benzerlik_spami: "policy_violation_similarity_spam",
+        zorbalik: "policy_violation_bullying",
+        taciz: "policy_violation_harassment",
+        terorist_icerik: "policy_violation_terrorism",
+        intihal: "policy_violation_plagiarism",
+        nefret_soylemi: "policy_violation_hate_speech",
+        mustehcenlik: "policy_violation_obscenity",
+        kisisel_bilgi: "policy_violation_pii",
+        meet_baglantilari: "policy_violation_meet_links",
+        other: "policy_violation_other"
+    };
 
-      const bm_user   = getParam('bm_user');
-      const bm_action = getParam('bm_action') || 'action_taken_moderators_banned_the_user';
-      const bm_market = getParam('bm_market') || 'turkey_clone';
-      const bm_policy = getParam('bm_policy') || 'benzerlik_spami';
+    const selectedPolicy = policyMap[policyKey] || "policy_violation_similarity_spam";
 
-      const userProfile = bm_user ? decodeURIComponent(bm_user) : '';
-      const actionTaken = decodeURIComponent(bm_action);
-      const market      = decodeURIComponent(bm_market);
-      const policyKey   = decodeURIComponent(bm_policy);
+    const fill = () => {
+        try {
+            const form = document.querySelector("#new_request");
+            if(!form) return false;
 
-      const policyMap = {
-          spam: "policy_violation_spam",
-          ticari_spam: "policy_violation_commercial_spam",
-          kufur: "policy_violation_profanity",
-          benzerlik_spami: "policy_violation_similarity_spam",
-          zorbalik: "policy_violation_bullying",
-          taciz: "policy_violation_harassment",
-          terorist_icerik: "policy_violation_terrorism",
-          intihal: "policy_violation_plagiarism",
-          nefret_soylemi: "policy_violation_hate_speech",
-          mustehcenlik: "policy_violation_obscenity",
-          kisisel_bilgi: "policy_violation_pii",
-          meet_baglantilari: "policy_violation_meet_links",
-          other: "policy_violation_other"
-      };
+            const emailField = document.querySelector("#request_anonymous_requester_email");
+            if(emailField) emailField.value = fixedEmail;
 
-      const selectedPolicy = policyMap[policyKey] || "policy_violation_similarity_spam";
+            const marketField = document.querySelector("#request_custom_fields_10024838758290");
+            if(marketField) marketField.value = market;
 
-      const fill = () => {
-          try {
-              const form = document.querySelector("#new_request");
-              if(!form) return false;
+            const modEmailField = document.querySelector("#request_custom_fields_9719571760786");
+            if(modEmailField) modEmailField.value = fixedEmail;
 
-              const emailField = document.querySelector("#request_anonymous_requester_email");
-              if(emailField) emailField.value = fixedEmail;
+            const profileField = document.querySelector("#request_custom_fields_5746316806162");
+            if(profileField) profileField.value = userProfile;
 
-              const marketField = document.querySelector("#request_custom_fields_10024838758290");
-              if(marketField) marketField.value = market;
+            const policyField = document.querySelector("#request_custom_fields_10025038149010");
+            if(policyField) {
+                policyField.value = selectedPolicy;
+                policyField.dispatchEvent(new Event('change', { bubbles: true }));
+            }
 
-              const modEmailField = document.querySelector("#request_custom_fields_9719571760786");
-              if(modEmailField) modEmailField.value = fixedEmail;
+            const actionField = document.querySelector("#request_custom_fields_9720010919570");
+            if(actionField) {
+                actionField.value = actionTaken;
+                actionField.dispatchEvent(new Event('change', { bubbles: true }));
+            }
 
-              const profileField = document.querySelector("#request_custom_fields_5746316806162");
-              if(profileField) profileField.value = userProfile;
+            const warningField = document.querySelector("#request_custom_fields_10024876212882");
+            if(warningField){
+                warningField.value = "warning_given_yes";
+                warningField.dispatchEvent(new Event('change', { bubbles: true }));
+                const aTag = warningField.parentElement.querySelector('a.nesty-input');
+                if(aTag) aTag.textContent = "Yes";
+            }
 
-              const policyField = document.querySelector("#request_custom_fields_10025038149010");
-              if(policyField) {
-                  policyField.value = selectedPolicy;
-                  policyField.dispatchEvent(new Event('change', { bubbles: true }));
-              }
+            form.submit();
+            history.replaceState(null, '', location.origin + location.pathname);
+            console.log("✅ Form dolduruldu ve gönderildi. Policy:", selectedPolicy);
 
-              const actionField = document.querySelector("#request_custom_fields_9720010919570");
-              if(actionField) {
-                  actionField.value = actionTaken;
-                  actionField.dispatchEvent(new Event('change', { bubbles: true }));
-              }
+            return true;
+        } catch(e){
+            console.error("Fill error:", e);
+            return false;
+        }
+    };
 
-              const warningField = document.querySelector("#request_custom_fields_10024876212882");
-              if(warningField){
-                  warningField.value = "warning_given_yes";
-                  warningField.dispatchEvent(new Event('change', { bubbles: true }));
-                  const aTag = warningField.parentElement.querySelector('a.nesty-input');
-                  if(aTag) aTag.textContent = "Yes";
-              }
+    const interval = setInterval(() => {
+        if(fill()) clearInterval(interval);
+    }, 800);
 
-              form.submit();
-              history.replaceState(null, '', location.origin + location.pathname);
-              console.log("✅ Form dolduruldu ve gönderildi. Policy:", selectedPolicy);
-              return true;
-          } catch(e){
-              console.error("Fill error:", e);
-              return false;
-          }
-      };
+    setTimeout(() => clearInterval(interval), 10000);
 
-      const interval = setInterval(() => {
-          if(fill()) clearInterval(interval);
-      }, 800);
-
-      setTimeout(() => clearInterval(interval), 10000);
-  })();
 })();
