@@ -2,7 +2,7 @@
 // @name         Brainly Moderation Panel PLUS5 (Right Fixed 5px + Persistent)
 // @namespace    http://tampermonkey.net/
 // @version      3.1
-// @description  moderasyon paneli
+// @description  moderasyon paneli 
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -19,7 +19,7 @@
   let panelHeight = saved.panelHeight ?? 420;
   let panelY = saved.panelY ?? 80; // sadece dikey pozisyon kaydedilecek
 
-  const RIGHT_OFFSET = 7; // ✅ Sağdan 5px içeride
+  const RIGHT_OFFSET = 5; // ✅ Sağdan 5px içeride
 
   const getTheme = () => isDarkMode ? {
     bg:'#181818', fg:'#f1f1f1', border:'#3f51b5', accent:'#2196f3', header:'#1976d2',
@@ -30,6 +30,7 @@
   };
   let c = getTheme();
 
+  // === Toggle Button ===
   const toggleBtn=document.createElement('button');
   Object.assign(toggleBtn.style,{
     position:'fixed',top:'14px',right:'14px',padding:'5px 9px',
@@ -38,7 +39,8 @@
   });
   toggleBtn.textContent="📝 Brainly";
   document.body.appendChild(toggleBtn);
-  
+
+  // === Panel ===
   const panel=document.createElement('div');
   Object.assign(panel.style,{
     position:'fixed',
