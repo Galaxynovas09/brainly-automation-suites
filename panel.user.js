@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Right Fixed 5px + Persistent)
+// @name         Brainly Moderation Panel PLUS5 (Right Fixed 5px + Fixed Size)
 // @namespace    http://tampermonkey.net/
-// @version      3.1
-// @description  moderasyon paneli 
+// @version      3.2
+// @description  moderasyon paneli
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -10,15 +10,14 @@
 
 (function(){
   'use strict';
-  const PREF_KEY = "bm_panel_prefs_v16";
+  const PREF_KEY = "bm_panel_prefs_v17";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
 
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
   let autoSync = saved.autoSync ?? true;
-  let panelWidth = saved.panelWidth ?? 200;
-  let panelHeight = saved.panelHeight ?? 420;
+  const panelWidth = 200;   // ✅ SABİT GENİŞLİK
+  const panelHeight = 420;  // ✅ SABİT YÜKSEKLİK
   let panelY = saved.panelY ?? 80; // sadece dikey pozisyon kaydedilecek
-
   const RIGHT_OFFSET = 5; // ✅ Sağdan 5px içeride
 
   const getTheme = () => isDarkMode ? {
@@ -45,7 +44,7 @@
   Object.assign(panel.style,{
     position:'fixed',
     top: panelY + 'px',
-    right: RIGHT_OFFSET + 'px', // ✅ Sağdan 5px sabit
+    right: RIGHT_OFFSET + 'px',
     width: panelWidth + 'px',
     height: panelHeight + 'px',
     background:c.bg,
@@ -57,15 +56,10 @@
     borderTopLeftRadius:'8px',
     borderBottomLeftRadius:'8px',
     overflowY:'auto',
-    resize:'both',
     boxSizing:'border-box',
     paddingBottom:'10px',
     boxShadow:'-3px 0 10px rgba(0,0,0,0.25)',
-    display:'none',
-    minWidth:'150px',
-    minHeight:'250px',
-    maxWidth:'600px',
-    maxHeight:'800px'
+    display:'none'
   });
 
   const header=document.createElement('div');
@@ -149,13 +143,7 @@
   };
 
   const savePrefs=()=>{
-    const rect=panel.getBoundingClientRect();
-    localStorage.setItem(PREF_KEY, JSON.stringify({
-      isDarkMode,autoSync,
-      panelWidth:rect.width,
-      panelHeight:rect.height,
-      panelY:rect.top
-    }));
+    localStorage.setItem(PREF_KEY, JSON.stringify({isDarkMode,autoSync,panelY}));
   };
 
   toggleBtn.addEventListener('click',()=>{ panel.style.display=panel.style.display==="none"?"block":"none"; });
@@ -186,7 +174,6 @@
   });
   document.addEventListener('mouseup',()=>{ if(dragging){dragging=false;header.style.cursor='move';savePrefs();} });
 
-  new ResizeObserver(savePrefs).observe(panel);
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
     if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();}
   });
