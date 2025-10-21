@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Right Fixed 5px + Fixed Size + Correct Ban Logic)
+// @name         Brainly Moderation Panel PLUS5 (Right Fixed 5px + Fixed Size + Auto Form Selection)
 // @namespace    http://tampermonkey.net/
-// @version      3.3
+// @version      3.4
 // @description  moderasyon paneli 
 // @match        *://*/*
 // @grant        none
@@ -10,7 +10,7 @@
 
 (function(){
   'use strict';
-  const PREF_KEY = "bm_panel_prefs_v18";
+  const PREF_KEY = "bm_panel_prefs_v19";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
 
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -153,22 +153,31 @@
     savePrefs();
   });
 
-  // ✅ DOĞRU SEÇİMİ YAPAN KISIM
+  // ✅ ZEN DESK FORMUNA OTOMATİK SEÇİM GÖNDERİMİ
   document.getElementById('bm_send').addEventListener('click',()=>{
     const user=document.getElementById('bm_user_link').value.trim();
     const action=document.getElementById('bm_action').value;
     const policy=document.getElementById('bm_policy').value;
     const market=document.getElementById('bm_market').value;
-
     if(!user){alert('Kullanıcı linkini gir.');return;}
 
-    // URL parametrelerini doğru ekler
+    // Parametreleri formda otomatik doldurmak için query ekle
     const base='https://brainly-trustandsafety.zendesk.com/hc/en-us/requests/new?ticket_form_id=9719157534610';
-    const params=`&bm_user=${encodeURIComponent(user)}&action=${encodeURIComponent(action)}&policy=${encodeURIComponent(policy)}&market=${encodeURIComponent(market)}`;
-    const finalURL=base+params;
+    const params=new URLSearchParams({
+      bm_user:user,
+      action_taken:action,
+      policy_violation:policy,
+      market:market,
+      auto_select:"true"
+    });
 
+    const finalURL=`${base}&${params.toString()}`;
     window.open(finalURL,'_blank');
-    document.getElementById('bm_status').textContent=`✅ Gönderildi: ${user}\nAction: ${action}\nPolicy: ${policy}\nMarket: ${market}`;
+    document.getElementById('bm_status').textContent=`✅ Gönderildi:
+Kullanıcı: ${user}
+İşlem: ${action}
+Sebep: ${policy}
+Market: ${market}`;
     document.getElementById('bm_user_link').value='';
   });
 
