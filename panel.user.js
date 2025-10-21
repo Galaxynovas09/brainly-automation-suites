@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Right Fixed 5px + Wider + Right-Aligned)
+// @name         Brainly Moderation Panel PLUS5 (Right Fixed 5px + Fixed Size)
 // @namespace    http://tampermonkey.net/
-// @version      3.3
-// @description  moderasyon paneli
+// @version      3.2
+// @description  moderasyon paneli 
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -10,15 +10,16 @@
 
 (function(){
   'use strict';
-  const PREF_KEY = "bm_panel_prefs_v18";
+  const PREF_KEY = "bm_panel_prefs_v17";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
 
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
   let autoSync = saved.autoSync ?? true;
-  const panelWidth = 250;   // ✅ 
-  const panelHeight = 420;  // ✅ 
-  let panelY = saved.panelY ?? 80; // 
-  const RIGHT_OFFSET = 5; // ✅
+  const panelWidth = 200;   // ✅ SABİT GENİŞLİK
+  const panelHeight = 420;  // ✅ SABİT YÜKSEKLİK
+  let panelY = saved.panelY ?? 80; // sadece dikey pozisyon kaydedilecek
+  const RIGHT_OFFSET = 5; // ✅ Sağdan 5px içeride
+
   const getTheme = () => isDarkMode ? {
     bg:'#181818', fg:'#f1f1f1', border:'#3f51b5', accent:'#2196f3', header:'#1976d2',
     inputBg:'#202020', inputBorder:'#333', btnBg:'#2a2a2a', btnBorder:'#555'
@@ -111,15 +112,13 @@
     #bm_user_link,#bm_action,#bm_policy,#bm_market{
       width:100%;padding:6px;margin:5px 0 8px 0;box-sizing:border-box;
       border-radius:4px;font-size:12px;outline:none;
-      text-align:right;  /* Yazıları sağa yasladık */
     }
     #bm_send,#bm_toggleTheme,#bm_syncToggle{
       width:100%;padding:7px;margin-top:5px;border:none;border-radius:5px;
       cursor:pointer;font-weight:bold;font-size:12.5px;
       transition:background 0.2s ease;
-      text-align:right; /* Butonları sağa yasladık */
     }
-    #bm_status{margin-top:5px;font-family:monospace;font-size:11.5px;white-space:pre-wrap;text-align:right;}
+    #bm_status{margin-top:5px;font-family:monospace;font-size:11.5px;white-space:pre-wrap;}
   `;
   document.head.appendChild(style);
 
