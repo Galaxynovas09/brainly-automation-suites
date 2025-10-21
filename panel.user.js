@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Slack Safe + Fixed Right)
+// @name         Brainly Moderation Panel PLUS5 (Right Fixed + Drag Persist)
 // @namespace    http://tampermonkey.net/
-// @version      2.8
+// @version      2.6
 // @description  moderasyon paneli
 // @match        *://*/*
 // @grant        none
@@ -10,7 +10,7 @@
 
 (function(){
   'use strict';
-  const PREF_KEY = "bm_panel_prefs_v13";
+  const PREF_KEY = "bm_panel_prefs_v11";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
 
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -18,7 +18,8 @@
   let panelWidth = saved.panelWidth ?? 270;
   let panelHeight = saved.panelHeight ?? 420;
 
-  let hasCustomPos = (typeof saved.panelX === "number" && typeof saved.panelY === "number");
+  // 🚀 Sağda sabit başlangıç — kaydedilen konum varsa onu kullan
+  let hasCustomPos = typeof saved.panelX === "number" && typeof saved.panelY === "number";
   let panelX = hasCustomPos ? saved.panelX : (window.innerWidth - panelWidth - 20);
   let panelY = hasCustomPos ? saved.panelY : 70;
 
@@ -35,10 +36,10 @@
   Object.assign(toggleBtn.style,{
     position:'fixed',top:'14px',right:'14px',padding:'5px 9px',
     backgroundColor:c.accent,color:'#fff',border:'none',borderRadius:'5px',
-    cursor:'pointer',zIndex:2147483647,fontWeight:'bold',fontSize:'13px'
+    cursor:'pointer',zIndex:9999999,fontWeight:'bold',fontSize:'13px'
   });
   toggleBtn.textContent="📝 Brainly";
-  document.documentElement.appendChild(toggleBtn);
+  document.body.appendChild(toggleBtn);
 
   const panel=document.createElement('div');
   Object.assign(panel.style,{
@@ -50,7 +51,7 @@
     background:c.bg,
     color:c.fg,
     border:`1.5px solid ${c.border}`,
-    zIndex:2147483646,
+    zIndex:9999998,
     fontFamily:'Arial,sans-serif',
     fontSize:'12.5px',
     borderRadius:'8px',
@@ -110,7 +111,25 @@
     <button id="bm_syncToggle">🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}</button>
   `;
   panel.appendChild(content);
-  document.documentElement.appendChild(panel);
+  document.body.appendChild(panel);
+
+  const style=document.createElement('style');
+  style.textContent=`
+    #bm_user_link,#bm_action,#bm_policy,#bm_market{
+      width:100%;padding:6px;margin:5px 0 8px 0;box-sizing:border-box;
+      border-radius:4px;font-size:12px;outline:none;
+    }
+    #bm_send,#bm_toggleTheme,#bm_syncToggle{
+      width:100%;padding:7px;margin-top:5px;
+      border:none;border-radius:5px;
+      cursor:pointer;font-weight:bold;font-size:12.5px;
+      transition:background 0.2s ease;
+    }
+    #bm_send:hover{opacity:0.9;}
+    #bm_toggleTheme:hover,#bm_syncToggle:hover{filter:brightness(1.1);}
+    #bm_status{margin-top:5px;font-family:monospace;font-size:11.5px;white-space:pre-wrap;}
+  `;
+  document.head.appendChild(style);
 
   const applyTheme=()=>{
     c=getTheme();
@@ -173,11 +192,16 @@
     panel.style.top = panelY + 'px';
   });
   document.addEventListener('mouseup',()=>{
-    if(dragging){dragging=false;header.style.cursor='move';savePrefs();}
+    if(dragging){
+      dragging=false;
+      header.style.cursor='move';
+      savePrefs();
+    }
   });
 
   new ResizeObserver(()=>savePrefs()).observe(panel);
 
+  // --- Gönder butonu ---
   document.getElementById('bm_send').addEventListener('click',()=>{
     const user=document.getElementById('bm_user_link').value.trim();
     if(!user){alert('Kullanıcı linkini gir.');return;}
@@ -193,14 +217,6 @@
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
     if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();}
   });
-
-  // 🛡️ Slack özel koruması: sola kayarsa geri döndür
-  setInterval(()=>{
-    const rect = panel.getBoundingClientRect();
-    if(rect.left < 100 && window.location.host.includes("slack.com")){
-      panel.style.left = (window.innerWidth - rect.width - 20) + "px";
-    }
-  }, 2000);
 
   applyTheme();
 })();
