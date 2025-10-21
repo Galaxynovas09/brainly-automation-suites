@@ -2,7 +2,7 @@
 // @name         Brainly Moderation Panel PLUS5 (Fixed Right + Draggable)
 // @namespace    http://tampermonkey.net/
 // @version      2.4
-// @description  Sağda sabit konumda açılan, sürüklenebilir moderasyon paneli (boyut ve tema koruma)
+// @description  Roma Form Paneli
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -30,7 +30,6 @@
   };
   let c = getTheme();
 
-  // === Toggle Button ===
   const toggleBtn=document.createElement('button');
   Object.assign(toggleBtn.style,{
     position:'fixed',top:'14px',right:'14px',padding:'5px 9px',
@@ -40,7 +39,6 @@
   toggleBtn.textContent="📝 Brainly";
   document.body.appendChild(toggleBtn);
 
-  // === Panel ===
   const panel=document.createElement('div');
   Object.assign(panel.style,{
     position:'fixed',
@@ -113,7 +111,6 @@
   panel.appendChild(content);
   document.body.appendChild(panel);
 
-  // === CSS ===
   const style=document.createElement('style');
   style.textContent=`
     #bm_user_link,#bm_action,#bm_policy,#bm_market{
@@ -132,7 +129,6 @@
   `;
   document.head.appendChild(style);
 
-  // === Tema Uygula ===
   const applyTheme=()=>{
     c=getTheme();
     panel.style.background=c.bg;
@@ -153,7 +149,6 @@
     });
   };
 
-  // === Ayarları Kaydet ===
   const savePrefs=()=>{
     const rect = panel.getBoundingClientRect();
     localStorage.setItem(PREF_KEY, JSON.stringify({
@@ -166,12 +161,10 @@
     }));
   };
 
-  // === Tema ve Senkron ===
   document.getElementById('bm_toggleTheme').addEventListener('click',()=>{isDarkMode=!isDarkMode;applyTheme();savePrefs();});
   document.getElementById('bm_syncToggle').addEventListener('click',()=>{autoSync=!autoSync;document.getElementById('bm_syncToggle').textContent=`🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}`;savePrefs();});
   toggleBtn.addEventListener('click',()=>{panel.style.display=panel.style.display==="none"?"block":"none";});
 
-  // === Sürükleme ===
   let dragging=false,offsetX=0,offsetY=0;
   header.addEventListener('mousedown',e=>{
     dragging=true;
@@ -183,7 +176,7 @@
     if(!dragging)return;
     panelX = e.clientX - offsetX;
     panelY = e.clientY - offsetY;
-    // Ekrandan taşmayı önle
+
     panelX = Math.max(0, Math.min(window.innerWidth - panel.offsetWidth, panelX));
     panelY = Math.max(0, Math.min(window.innerHeight - 100, panelY));
     panel.style.left = panelX + 'px';
@@ -197,10 +190,8 @@
     }
   });
 
-  // === Resize Kaydet ===
   new ResizeObserver(()=>savePrefs()).observe(panel);
 
-  // === Gönder Butonu ===
   document.getElementById('bm_send').addEventListener('click',()=>{
     const user=document.getElementById('bm_user_link').value.trim();
     if(!user){alert('Kullanıcı linkini gir.');return;}
@@ -213,7 +204,6 @@
     status.textContent=`✅ Gönderildi: ${user}`;
   });
 
-  // === Sistem Temasıyla Senkronizasyon ===
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
     if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();}
   });
