@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Stable Theme + Drag + Resize)
+// @name         Brainly Moderation Panel PLUS5 (Fixed Size + Drag + Resize)
 // @namespace    http://tampermonkey.net/
-// @version      2.0
-// @description  Roma formu moderasyon paneli
+// @version      2.1
+// @description  Sabit boyutlu, sonradan büyütülebilen Roma formu moderasyon paneli
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -11,7 +11,7 @@
 (function(){
   'use strict';
 
-  const PREF_KEY = "bm_panel_prefs_v6";
+  const PREF_KEY = "bm_panel_prefs_v7";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
   let autoSync = saved.autoSync ?? true;
@@ -42,13 +42,29 @@
   // === Panel ===
   const panel=document.createElement('div');
   Object.assign(panel.style,{
-    position:'fixed',top:panelY?panelY+'px':'70px',right:panelX?null:'10px',left:panelX?panelX+'px':null,
-    width:panelWidth+'px',height:panelHeight+'px',
-    background:c.bg,color:c.fg,border:`1.5px solid ${c.border}`,
-    zIndex:9999998,fontFamily:'Arial,sans-serif',fontSize:'12.5px',
-    borderRadius:'8px',overflowY:'auto',resize:'both',
-    boxSizing:'border-box',paddingBottom:'10px',
-    boxShadow:'0 3px 10px rgba(0,0,0,0.25)',display:'none'
+    position:'fixed',
+    top:panelY?panelY+'px':'70px',
+    left:panelX?panelX+'px':null,
+    right:panelX?null:'10px',
+    width:panelWidth+'px',
+    height:panelHeight+'px',
+    background:c.bg,
+    color:c.fg,
+    border:`1.5px solid ${c.border}`,
+    zIndex:9999998,
+    fontFamily:'Arial,sans-serif',
+    fontSize:'12.5px',
+    borderRadius:'8px',
+    overflowY:'auto',
+    resize:'both',
+    minWidth:'200px',
+    minHeight:'250px',
+    maxWidth:'600px',
+    maxHeight:'800px',
+    boxSizing:'border-box',
+    paddingBottom:'10px',
+    boxShadow:'0 3px 10px rgba(0,0,0,0.25)',
+    display:'none'
   });
 
   const header=document.createElement('div');
@@ -139,12 +155,13 @@
 
   const savePrefs=()=>{
     localStorage.setItem(PREF_KEY,JSON.stringify({
-      isDarkMode,autoSync,panelWidth:panel.offsetWidth,panelHeight:panel.offsetHeight,
+      isDarkMode,autoSync,
+      panelWidth:panel.offsetWidth,panelHeight:panel.offsetHeight,
       panelX:panel.offsetLeft,panelY:panel.offsetTop
     }));
   };
 
-  // === Tema Değiştir ===
+  // === Tema & Senkron ===
   document.getElementById('bm_toggleTheme').addEventListener('click',()=>{
     isDarkMode=!isDarkMode;applyTheme();savePrefs();
   });
