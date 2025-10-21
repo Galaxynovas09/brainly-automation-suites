@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Right Fixed + Drag Persist + Working Buttons)
+// @name         Brainly Moderation Panel PLUS5 (Right Fixed + Persistent Size/Position)
 // @namespace    http://tampermonkey.net/
-// @version      2.6.1
+// @version      2.7
 // @description  moderasyon paneli
 // @match        *://*/*
 // @grant        none
@@ -10,18 +10,17 @@
 
 (function(){
   'use strict';
-  const PREF_KEY = "bm_panel_prefs_v11";
+  const PREF_KEY = "bm_panel_prefs_v12";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
 
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
   let autoSync = saved.autoSync ?? true;
-  let panelWidth = saved.panelWidth ?? 270;
-  let panelHeight = saved.panelHeight ?? 420;
+  let panelWidth = saved.panelWidth ?? 180;
+  let panelHeight = saved.panelHeight ?? 400;
 
-  // Sağda sabit başlangıç — kaydedilen konum varsa onu kullan
-  let hasCustomPos = typeof saved.panelX === "number" && typeof saved.panelY === "number";
-  let panelX = hasCustomPos ? saved.panelX : (window.innerWidth - panelWidth - 20);
-  let panelY = hasCustomPos ? saved.panelY : 70;
+  // 🧭 Sağda sabit pozisyon – sayfa her yüklendiğinde sağdan ölçülür
+  const panelRight = saved.panelRight ?? 20;
+  let panelY = saved.panelY ?? 80;
 
   const getTheme = () => isDarkMode ? {
     bg:'#181818', fg:'#f1f1f1', border:'#3f51b5', accent:'#2196f3', header:'#1976d2',
@@ -47,7 +46,7 @@
   Object.assign(panel.style,{
     position:'fixed',
     top: panelY + 'px',
-    left: panelX + 'px',
+    right: panelRight + 'px',
     width: panelWidth + 'px',
     height: panelHeight + 'px',
     background:c.bg,
@@ -59,10 +58,6 @@
     borderRadius:'8px',
     overflowY:'auto',
     resize:'both',
-    minWidth:'200px',
-    minHeight:'250px',
-    maxWidth:'600px',
-    maxHeight:'800px',
     boxSizing:'border-box',
     paddingBottom:'10px',
     boxShadow:'0 3px 10px rgba(0,0,0,0.25)',
@@ -93,7 +88,6 @@
        <option value="spam" selected>Meet Bağlantıları</option>
        <option value="ticari_spam">Ticari Spam</option>
        <option value="kufur">Küfür</option>
-       <option value="benzerlik_spami">Benzerlik Spamı</option>
        <option value="zorbalik">Zorbalık</option>
        <option value="taciz">Taciz</option>
        <option value="terorist_icerik">Terörist İçerik</option>
@@ -102,7 +96,7 @@
        <option value="mustehcenlik">Müstehcenlik</option>
        <option value="other">Diğer</option>
     </select>
-    <label>Market (optional)</label>
+    <label>Market</label>
     <select id="bm_market">
       <option value="turkey_clone" selected>Turkey</option>
     </select>
@@ -115,7 +109,6 @@
   panel.appendChild(content);
   document.body.appendChild(panel);
 
-  // === Style ===
   const style=document.createElement('style');
   style.textContent=`
     #bm_user_link,#bm_action,#bm_policy,#bm_market{
@@ -123,13 +116,10 @@
       border-radius:4px;font-size:12px;outline:none;
     }
     #bm_send,#bm_toggleTheme,#bm_syncToggle{
-      width:100%;padding:7px;margin-top:5px;
-      border:none;border-radius:5px;
+      width:100%;padding:7px;margin-top:5px;border:none;border-radius:5px;
       cursor:pointer;font-weight:bold;font-size:12.5px;
       transition:background 0.2s ease;
     }
-    #bm_send:hover{opacity:0.9;}
-    #bm_toggleTheme:hover,#bm_syncToggle:hover{filter:brightness(1.1);}
     #bm_status{margin-top:5px;font-family:monospace;font-size:11.5px;white-space:pre-wrap;}
   `;
   document.head.appendChild(style);
@@ -157,70 +147,55 @@
   const savePrefs=()=>{
     const rect = panel.getBoundingClientRect();
     localStorage.setItem(PREF_KEY, JSON.stringify({
-      isDarkMode,autoSync,
+      isDarkMode, autoSync,
       panelWidth: rect.width,
       panelHeight: rect.height,
-      panelX: rect.left,
+      panelRight: parseFloat(window.innerWidth - rect.right),
       panelY: rect.top
     }));
   };
 
-  // === Olaylar sadece DOM tam hazır olduktan sonra eklenecek ===
-  function attachEvents(){
-    document.getElementById('bm_toggleTheme').addEventListener('click',()=>{
-      isDarkMode=!isDarkMode;applyTheme();savePrefs();
-    });
-    document.getElementById('bm_syncToggle').addEventListener('click',()=>{
-      autoSync=!autoSync;
-      document.getElementById('bm_syncToggle').textContent=`🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}`;
-      savePrefs();
-    });
-    document.getElementById('bm_send').addEventListener('click',()=>{
-      const user=document.getElementById('bm_user_link').value.trim();
-      if(!user){alert('Kullanıcı linkini gir.');return;}
-      const base='https://brainly-trustandsafety.zendesk.com/hc/en-us/requests/new?ticket_form_id=9719157534610';
-      const params=`&bm_user=${encodeURIComponent(user)}&bm_action=${encodeURIComponent(document.getElementById('bm_action').value)}&bm_policy=${encodeURIComponent(document.getElementById('bm_policy').value)}&bm_market=${encodeURIComponent(document.getElementById('bm_market').value)}`;
-      const w=window.open(base+params,'_blank');
-      const status=document.getElementById('bm_status');
-      if(!w){status.textContent='❌ Pop-up engellendi — tarayıcı izin verin.';return;}
-      document.getElementById('bm_user_link').value='';
-      status.textContent=`✅ Gönderildi: ${user}`;
-    });
-  }
-
-  // === Toggle buton ===
   toggleBtn.addEventListener('click',()=>{
     panel.style.display=panel.style.display==="none"?"block":"none";
   });
 
-  // === Sürükleme ===
-  let dragging=false,offsetX=0,offsetY=0;
+  // Sürükleme (sağ sabit olacak)
+  let dragging=false,offsetY=0;
   header.addEventListener('mousedown',e=>{
     dragging=true;
-    offsetX=e.clientX - panel.getBoundingClientRect().left;
     offsetY=e.clientY - panel.getBoundingClientRect().top;
     header.style.cursor='grabbing';
   });
   document.addEventListener('mousemove',e=>{
     if(!dragging)return;
-    panelX = e.clientX - offsetX;
     panelY = e.clientY - offsetY;
-    panelX = Math.max(0, Math.min(window.innerWidth - panel.offsetWidth, panelX));
     panelY = Math.max(0, Math.min(window.innerHeight - 100, panelY));
-    panel.style.left = panelX + 'px';
     panel.style.top = panelY + 'px';
   });
-  document.addEventListener('mouseup',()=>{
-    if(dragging){dragging=false;header.style.cursor='move';savePrefs();}
-  });
+  document.addEventListener('mouseup',()=>{ if(dragging){dragging=false;header.style.cursor='move';savePrefs();} });
 
-  new ResizeObserver(()=>savePrefs()).observe(panel);
+  // === Tema ve senkron butonları ===
+  document.addEventListener('click',e=>{
+    if(e.target.id==='bm_toggleTheme'){ isDarkMode=!isDarkMode;applyTheme();savePrefs(); }
+    if(e.target.id==='bm_syncToggle'){
+      autoSync=!autoSync;
+      e.target.textContent=`🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}`;
+      savePrefs();
+    }
+    if(e.target.id==='bm_send'){
+      const user=document.getElementById('bm_user_link').value.trim();
+      if(!user){alert('Kullanıcı linkini gir.');return;}
+      const base='https://brainly-trustandsafety.zendesk.com/hc/en-us/requests/new?ticket_form_id=9719157534610';
+      const params=`&bm_user=${encodeURIComponent(user)}`;
+      window.open(base+params,'_blank');
+      document.getElementById('bm_status').textContent=`✅ Gönderildi: ${user}`;
+      document.getElementById('bm_user_link').value='';
+    }
+  });
 
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
     if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();}
   });
 
-  // === Temayı uygula ve olayları bağla ===
   applyTheme();
-  attachEvents();
 })();
