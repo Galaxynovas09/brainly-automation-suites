@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Right Fixed + Drag Persist)
+// @name         Brainly Moderation Panel PLUS5 (Always Right Fixed + Persist on Move)
 // @namespace    http://tampermonkey.net/
-// @version      2.6
-// @description  moderasyon paneli
+// @version      2.7
+// @description  Her zaman sağda sabit, sadece elle taşındığında konumu kaydeden moderasyon paneli
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -10,7 +10,7 @@
 
 (function(){
   'use strict';
-  const PREF_KEY = "bm_panel_prefs_v11";
+  const PREF_KEY = "bm_panel_prefs_v12";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
 
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -18,8 +18,8 @@
   let panelWidth = saved.panelWidth ?? 270;
   let panelHeight = saved.panelHeight ?? 420;
 
-  // 🚀 Sağda sabit başlangıç — kaydedilen konum varsa onu kullan
-  let hasCustomPos = typeof saved.panelX === "number" && typeof saved.panelY === "number";
+  // 🔹 Konum: eğer kaydedilmediyse SAĞDA başlat
+  let hasCustomPos = (typeof saved.panelX === "number" && typeof saved.panelY === "number");
   let panelX = hasCustomPos ? saved.panelX : (window.innerWidth - panelWidth - 20);
   let panelY = hasCustomPos ? saved.panelY : 70;
 
@@ -32,6 +32,7 @@
   };
   let c = getTheme();
 
+  // --- Toggle button ---
   const toggleBtn=document.createElement('button');
   Object.assign(toggleBtn.style,{
     position:'fixed',top:'14px',right:'14px',padding:'5px 9px',
@@ -41,6 +42,7 @@
   toggleBtn.textContent="📝 Brainly";
   document.body.appendChild(toggleBtn);
 
+  // --- Panel ---
   const panel=document.createElement('div');
   Object.assign(panel.style,{
     position:'fixed',
@@ -201,7 +203,6 @@
 
   new ResizeObserver(()=>savePrefs()).observe(panel);
 
-  // --- Gönder butonu ---
   document.getElementById('bm_send').addEventListener('click',()=>{
     const user=document.getElementById('bm_user_link').value.trim();
     if(!user){alert('Kullanıcı linkini gir.');return;}
