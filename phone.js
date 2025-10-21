@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Stable Theme + Drag + Resize)
+// @name         Brainly Moderation Panel PLUS5 (Stable + Mobile)
 // @namespace    http://tampermonkey.net/
-// @version      2.0
-// @description  Roma formu moderasyon paneli
+// @version      2.1
+// @description  Roma formu moderasyon paneli (mobil uyumlu, sürüklenebilir, boyutlanabilir)
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -11,14 +11,10 @@
 (function(){
   'use strict';
 
-  const PREF_KEY = "bm_panel_prefs_v6";
+  const PREF_KEY = "bm_panel_prefs_v7";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
   let autoSync = saved.autoSync ?? true;
-  let panelWidth = saved.panelWidth ?? 270;
-  let panelHeight = saved.panelHeight ?? 420;
-  let panelX = saved.panelX ?? null;
-  let panelY = saved.panelY ?? null;
 
   const getTheme = () => isDarkMode ? {
     bg:'#181818', fg:'#f1f1f1', border:'#3f51b5', accent:'#2196f3', header:'#1976d2',
@@ -32,8 +28,8 @@
   // === Toggle Button ===
   const toggleBtn=document.createElement('button');
   Object.assign(toggleBtn.style,{
-    position:'fixed',top:'14px',right:'14px',padding:'5px 9px',
-    backgroundColor:c.accent,color:'#fff',border:'none',borderRadius:'5px',
+    position:'fixed',top:'12px',right:'12px',padding:'6px 10px',
+    backgroundColor:c.accent,color:'#fff',border:'none',borderRadius:'6px',
     cursor:'pointer',zIndex:9999999,fontWeight:'bold',fontSize:'13px'
   });
   toggleBtn.textContent="📝 Brainly";
@@ -42,35 +38,35 @@
   // === Panel ===
   const panel=document.createElement('div');
   Object.assign(panel.style,{
-    position:'fixed',top:panelY?panelY+'px':'70px',right:panelX?null:'10px',left:panelX?panelX+'px':null,
-    width:panelWidth+'px',height:panelHeight+'px',
+    position:'fixed',top:'60px',left:'50%',transform:'translateX(-50%)',
+    width:'min(90vw, 320px)',height:'min(85vh, 460px)',
     background:c.bg,color:c.fg,border:`1.5px solid ${c.border}`,
-    zIndex:9999998,fontFamily:'Arial,sans-serif',fontSize:'12.5px',
-    borderRadius:'8px',overflowY:'auto',resize:'both',
+    zIndex:9999998,fontFamily:'Arial,sans-serif',fontSize:'13px',
+    borderRadius:'10px',overflowY:'auto',resize:'both',
     boxSizing:'border-box',paddingBottom:'10px',
-    boxShadow:'0 3px 10px rgba(0,0,0,0.25)',display:'none'
+    boxShadow:'0 3px 12px rgba(0,0,0,0.25)',display:'none'
   });
 
   const header=document.createElement('div');
   header.textContent="Brainly Moderation Panel";
   Object.assign(header.style,{
-    background:c.header,color:'#fff',padding:'7px',cursor:'move',
-    fontWeight:'600',borderTopLeftRadius:'8px',borderTopRightRadius:'8px',
-    textAlign:'center',fontSize:'12.5px',userSelect:'none'
+    background:c.header,color:'#fff',padding:'8px',cursor:'move',
+    fontWeight:'600',borderTopLeftRadius:'10px',borderTopRightRadius:'10px',
+    textAlign:'center',fontSize:'13px',userSelect:'none'
   });
   panel.appendChild(header);
 
   const content=document.createElement('div');
-  content.style.padding="8px";
+  content.style.padding="10px";
   content.innerHTML=`
     <input id="bm_user_link" type="text" placeholder="Kullanıcı profil linki (https://...)" />
-    <label>Action Taken</label>
+    <label>Aksiyon</label>
     <select id="bm_action">
      <option value="action_taken_moderators_24_hour_suspension">Kullanıcı 24 saat yasaklandı</option>
      <option value="action_taken_moderators_72_hour_suspension">Kullanıcı 72 saat yasaklandı</option>
       <option value="action_taken_moderators_banned_the_user" selected>Kullanıcı yasaklandı</option>
     </select>
-    <label>Policy Violation</label>
+    <label>İhlal Türü</label>
     <select id="bm_policy">
        <option value="spam" selected>Meet Bağlantıları</option>
       <option value="ticari_spam">Ticari Spam</option>
@@ -84,7 +80,7 @@
       <option value="mustehcenlik">Müstehcenlik</option>
       <option value="other">Diğer</option>
     </select>
-    <label>Market (optional)</label>
+    <label>Market</label>
     <select id="bm_market">
       <option value="turkey_clone" selected>Turkey</option>
     </select>
@@ -101,22 +97,20 @@
   const style=document.createElement('style');
   style.textContent=`
     #bm_user_link,#bm_action,#bm_policy,#bm_market{
-      width:100%;padding:6px;margin:5px 0 8px 0;box-sizing:border-box;
-      border-radius:4px;font-size:12px;outline:none;
+      width:100%;padding:8px;margin:6px 0 10px 0;box-sizing:border-box;
+      border-radius:5px;font-size:13px;outline:none;
     }
     #bm_send,#bm_toggleTheme,#bm_syncToggle{
-      width:100%;padding:7px;margin-top:5px;
-      border:none;border-radius:5px;
-      cursor:pointer;font-weight:bold;font-size:12.5px;
+      width:100%;padding:9px;margin-top:6px;
+      border:none;border-radius:6px;
+      cursor:pointer;font-weight:bold;font-size:13px;
       transition:background 0.2s ease;
     }
-    #bm_send:hover{opacity:0.9;}
-    #bm_toggleTheme:hover,#bm_syncToggle:hover{filter:brightness(1.1);}
-    #bm_status{margin-top:5px;font-family:monospace;font-size:11.5px;white-space:pre-wrap;}
+    #bm_status{margin-top:5px;font-family:monospace;font-size:12px;white-space:pre-wrap;}
+    select, input, button { touch-action: manipulation; }
   `;
   document.head.appendChild(style);
 
-  // === Tema Uygula ===
   const applyTheme=()=>{
     c=getTheme();
     panel.style.background=c.bg;panel.style.color=c.fg;panel.style.border=`1.5px solid ${c.border}`;
@@ -129,22 +123,14 @@
     const sync=document.getElementById('bm_syncToggle');
     send.style.background=c.accent;send.style.color='#fff';
     [theme,sync].forEach(b=>{
-      b.style.background=c.btnBg;
-      b.style.border=`1px solid ${c.btnBorder}`;
-      b.style.color=c.fg;
-      b.disabled=false;
-      b.style.pointerEvents='auto';
+      b.style.background=c.btnBg;b.style.border=`1px solid ${c.btnBorder}`;b.style.color=c.fg;
     });
   };
 
   const savePrefs=()=>{
-    localStorage.setItem(PREF_KEY,JSON.stringify({
-      isDarkMode,autoSync,panelWidth:panel.offsetWidth,panelHeight:panel.offsetHeight,
-      panelX:panel.offsetLeft,panelY:panel.offsetTop
-    }));
+    localStorage.setItem(PREF_KEY,JSON.stringify({isDarkMode,autoSync}));
   };
 
-  // === Tema Değiştir ===
   document.getElementById('bm_toggleTheme').addEventListener('click',()=>{
     isDarkMode=!isDarkMode;applyTheme();savePrefs();
   });
@@ -157,24 +143,26 @@
     panel.style.display=panel.style.display==="none"?"block":"none";
   });
 
-  // === Sürükleme ===
-  let dragging=false,offsetX=0,offsetY=0;
-  header.addEventListener('mousedown',e=>{
-    dragging=true;offsetX=e.clientX-panel.offsetLeft;offsetY=e.clientY-panel.offsetTop;
-    header.style.cursor='grabbing';
-  });
-  document.addEventListener('mousemove',e=>{
+  // === Dokunmatik + Fare ile Sürükleme ===
+  let dragging=false,startX=0,startY=0,offsetX=0,offsetY=0;
+  const startDrag=(x,y)=>{
+    dragging=true;
+    offsetX=x-panel.getBoundingClientRect().left;
+    offsetY=y-panel.getBoundingClientRect().top;
+  };
+  const moveDrag=(x,y)=>{
     if(!dragging)return;
-    panel.style.left=(e.clientX-offsetX)+'px';
-    panel.style.top=(e.clientY-offsetY)+'px';
-    panel.style.right='auto';
-  });
-  document.addEventListener('mouseup',()=>{
-    if(dragging){dragging=false;header.style.cursor='move';savePrefs();}
-  });
-
-  // === Resize Kaydet ===
-  new ResizeObserver(()=>savePrefs()).observe(panel);
+    panel.style.left=(x-offsetX)+'px';
+    panel.style.top=(y-offsetY)+'px';
+    panel.style.transform='none';
+  };
+  const endDrag=()=>{dragging=false;};
+  header.addEventListener('mousedown',e=>startDrag(e.clientX,e.clientY));
+  header.addEventListener('touchstart',e=>startDrag(e.touches[0].clientX,e.touches[0].clientY));
+  document.addEventListener('mousemove',e=>moveDrag(e.clientX,e.clientY));
+  document.addEventListener('touchmove',e=>moveDrag(e.touches[0].clientX,e.touches[0].clientY));
+  document.addEventListener('mouseup',endDrag);
+  document.addEventListener('touchend',endDrag);
 
   // === Gönder ===
   document.getElementById('bm_send').addEventListener('click',()=>{
@@ -189,10 +177,9 @@
     status.textContent=`✅ Gönderildi: ${user}`;
   });
 
-  // === Sistem Temasıyla Senkronizasyon ===
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
     if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();}
   });
 
   applyTheme();
-})();
+})();  bunu githuba kayıt edecek şekilde yap
