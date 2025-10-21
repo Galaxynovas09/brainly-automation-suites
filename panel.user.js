@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Right Fixed 5px + Fixed Size)
+// @name         Brainly Moderation Panel PLUS5 (Right Fixed 5px + Fixed Size + Correct Ban Logic)
 // @namespace    http://tampermonkey.net/
-// @version      3.2
-// @description  moderasyon paneli
+// @version      3.3
+// @description  moderasyon paneli 
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -10,15 +10,15 @@
 
 (function(){
   'use strict';
-  const PREF_KEY = "bm_panel_prefs_v17";
+  const PREF_KEY = "bm_panel_prefs_v18";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
 
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
   let autoSync = saved.autoSync ?? true;
-  const panelWidth = 250;   // ✅ Panelin genişliği artırıldı
-  const panelHeight = 420;  // ✅ SABİT YÜKSEKLİK
-  let panelY = saved.panelY ?? 80; // sadece dikey pozisyon kaydedilecek
-  const RIGHT_OFFSET = 5; // ✅ Sağdan 5px içeride
+  const panelWidth = 250;
+  const panelHeight = 420;
+  let panelY = saved.panelY ?? 80;
+  const RIGHT_OFFSET = 5;
 
   const getTheme = () => isDarkMode ? {
     bg:'#181818', fg:'#f1f1f1', border:'#3f51b5', accent:'#2196f3', header:'#1976d2',
@@ -60,7 +60,7 @@
     paddingBottom:'10px',
     boxShadow:'-3px 0 10px rgba(0,0,0,0.25)',
     display:'none',
-    textAlign: 'center' // ✅ Yazıları ortalamak için eklendi
+    textAlign: 'center'
   });
 
   const header=document.createElement('div');
@@ -80,7 +80,7 @@
     <select id="bm_action">
      <option value="action_taken_moderators_24_hour_suspension">Kullanıcı 24 saat yasaklandı</option>
      <option value="action_taken_moderators_72_hour_suspension">Kullanıcı 72 saat yasaklandı</option>
-     <option value="action_taken_moderators_banned_the_user" selected>Kullanıcı yasaklandı</option>
+     <option value="action_taken_moderators_banned_the_user" selected>Kullanıcı kalıcı olarak yasaklandı</option>
     </select>
     <label>Policy Violation</label>
     <select id="bm_policy">
@@ -143,22 +143,32 @@
     });
   };
 
-  const savePrefs=()=>{
-    localStorage.setItem(PREF_KEY, JSON.stringify({isDarkMode,autoSync,panelY}));
-  };
+  const savePrefs=()=>localStorage.setItem(PREF_KEY, JSON.stringify({isDarkMode,autoSync,panelY}));
 
-  toggleBtn.addEventListener('click',()=>{ panel.style.display=panel.style.display==="none"?"block":"none"; });
-  document.getElementById('bm_toggleTheme').addEventListener('click',()=>{ isDarkMode=!isDarkMode;applyTheme();savePrefs(); });
+  toggleBtn.addEventListener('click',()=>{panel.style.display=panel.style.display==="none"?"block":"none";});
+  document.getElementById('bm_toggleTheme').addEventListener('click',()=>{isDarkMode=!isDarkMode;applyTheme();savePrefs();});
   document.getElementById('bm_syncToggle').addEventListener('click',e=>{
-    autoSync=!autoSync; e.target.textContent=`🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}`; savePrefs();
+    autoSync=!autoSync;
+    e.target.textContent=`🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}`;
+    savePrefs();
   });
+
+  // ✅ DOĞRU SEÇİMİ YAPAN KISIM
   document.getElementById('bm_send').addEventListener('click',()=>{
     const user=document.getElementById('bm_user_link').value.trim();
+    const action=document.getElementById('bm_action').value;
+    const policy=document.getElementById('bm_policy').value;
+    const market=document.getElementById('bm_market').value;
+
     if(!user){alert('Kullanıcı linkini gir.');return;}
+
+    // URL parametrelerini doğru ekler
     const base='https://brainly-trustandsafety.zendesk.com/hc/en-us/requests/new?ticket_form_id=9719157534610';
-    const params=`&bm_user=${encodeURIComponent(user)}`;
-    window.open(base+params,'_blank');
-    document.getElementById('bm_status').textContent=`✅ Gönderildi: ${user}`;
+    const params=`&bm_user=${encodeURIComponent(user)}&action=${encodeURIComponent(action)}&policy=${encodeURIComponent(policy)}&market=${encodeURIComponent(market)}`;
+    const finalURL=base+params;
+
+    window.open(finalURL,'_blank');
+    document.getElementById('bm_status').textContent=`✅ Gönderildi: ${user}\nAction: ${action}\nPolicy: ${policy}\nMarket: ${market}`;
     document.getElementById('bm_user_link').value='';
   });
 
@@ -173,7 +183,7 @@
     panelY=Math.max(0,Math.min(window.innerHeight-100,panelY));
     panel.style.top=panelY+'px';
   });
-  document.addEventListener('mouseup',()=>{ if(dragging){dragging=false;header.style.cursor='move';savePrefs();} });
+  document.addEventListener('mouseup',()=>{if(dragging){dragging=false;header.style.cursor='move';savePrefs();}});
 
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
     if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();}
