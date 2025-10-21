@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Always Right Fixed + Persist on Move)
+// @name         Brainly Moderation Panel PLUS5 (Right Fixed + Drag Persist + Working Buttons)
 // @namespace    http://tampermonkey.net/
-// @version      2.7
-// @description  Her zaman sağda sabit, sadece elle taşındığında konumu kaydeden moderasyon paneli
+// @version      2.6.1
+// @description  moderasyon paneli
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -10,7 +10,7 @@
 
 (function(){
   'use strict';
-  const PREF_KEY = "bm_panel_prefs_v12";
+  const PREF_KEY = "bm_panel_prefs_v11";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
 
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -18,8 +18,8 @@
   let panelWidth = saved.panelWidth ?? 270;
   let panelHeight = saved.panelHeight ?? 420;
 
-  // 🔹 Konum: eğer kaydedilmediyse SAĞDA başlat
-  let hasCustomPos = (typeof saved.panelX === "number" && typeof saved.panelY === "number");
+  // Sağda sabit başlangıç — kaydedilen konum varsa onu kullan
+  let hasCustomPos = typeof saved.panelX === "number" && typeof saved.panelY === "number";
   let panelX = hasCustomPos ? saved.panelX : (window.innerWidth - panelWidth - 20);
   let panelY = hasCustomPos ? saved.panelY : 70;
 
@@ -32,7 +32,7 @@
   };
   let c = getTheme();
 
-  // --- Toggle button ---
+  // === Toggle Button ===
   const toggleBtn=document.createElement('button');
   Object.assign(toggleBtn.style,{
     position:'fixed',top:'14px',right:'14px',padding:'5px 9px',
@@ -42,7 +42,7 @@
   toggleBtn.textContent="📝 Brainly";
   document.body.appendChild(toggleBtn);
 
-  // --- Panel ---
+  // === Panel ===
   const panel=document.createElement('div');
   Object.assign(panel.style,{
     position:'fixed',
@@ -115,6 +115,7 @@
   panel.appendChild(content);
   document.body.appendChild(panel);
 
+  // === Style ===
   const style=document.createElement('style');
   style.textContent=`
     #bm_user_link,#bm_action,#bm_policy,#bm_market{
@@ -164,19 +165,35 @@
     }));
   };
 
-  document.getElementById('bm_toggleTheme').addEventListener('click',()=>{
-    isDarkMode=!isDarkMode;applyTheme();savePrefs();
-  });
-  document.getElementById('bm_syncToggle').addEventListener('click',()=>{
-    autoSync=!autoSync;
-    document.getElementById('bm_syncToggle').textContent=`🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}`;
-    savePrefs();
-  });
+  // === Olaylar sadece DOM tam hazır olduktan sonra eklenecek ===
+  function attachEvents(){
+    document.getElementById('bm_toggleTheme').addEventListener('click',()=>{
+      isDarkMode=!isDarkMode;applyTheme();savePrefs();
+    });
+    document.getElementById('bm_syncToggle').addEventListener('click',()=>{
+      autoSync=!autoSync;
+      document.getElementById('bm_syncToggle').textContent=`🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}`;
+      savePrefs();
+    });
+    document.getElementById('bm_send').addEventListener('click',()=>{
+      const user=document.getElementById('bm_user_link').value.trim();
+      if(!user){alert('Kullanıcı linkini gir.');return;}
+      const base='https://brainly-trustandsafety.zendesk.com/hc/en-us/requests/new?ticket_form_id=9719157534610';
+      const params=`&bm_user=${encodeURIComponent(user)}&bm_action=${encodeURIComponent(document.getElementById('bm_action').value)}&bm_policy=${encodeURIComponent(document.getElementById('bm_policy').value)}&bm_market=${encodeURIComponent(document.getElementById('bm_market').value)}`;
+      const w=window.open(base+params,'_blank');
+      const status=document.getElementById('bm_status');
+      if(!w){status.textContent='❌ Pop-up engellendi — tarayıcı izin verin.';return;}
+      document.getElementById('bm_user_link').value='';
+      status.textContent=`✅ Gönderildi: ${user}`;
+    });
+  }
+
+  // === Toggle buton ===
   toggleBtn.addEventListener('click',()=>{
     panel.style.display=panel.style.display==="none"?"block":"none";
   });
 
-  // --- Sürükleme ---
+  // === Sürükleme ===
   let dragging=false,offsetX=0,offsetY=0;
   header.addEventListener('mousedown',e=>{
     dragging=true;
@@ -194,30 +211,16 @@
     panel.style.top = panelY + 'px';
   });
   document.addEventListener('mouseup',()=>{
-    if(dragging){
-      dragging=false;
-      header.style.cursor='move';
-      savePrefs();
-    }
+    if(dragging){dragging=false;header.style.cursor='move';savePrefs();}
   });
 
   new ResizeObserver(()=>savePrefs()).observe(panel);
-
-  document.getElementById('bm_send').addEventListener('click',()=>{
-    const user=document.getElementById('bm_user_link').value.trim();
-    if(!user){alert('Kullanıcı linkini gir.');return;}
-    const base='https://brainly-trustandsafety.zendesk.com/hc/en-us/requests/new?ticket_form_id=9719157534610';
-    const params=`&bm_user=${encodeURIComponent(user)}&bm_action=${encodeURIComponent(document.getElementById('bm_action').value)}&bm_policy=${encodeURIComponent(document.getElementById('bm_policy').value)}&bm_market=${encodeURIComponent(document.getElementById('bm_market').value)}`;
-    const w=window.open(base+params,'_blank');
-    const status=document.getElementById('bm_status');
-    if(!w){status.textContent='❌ Pop-up engellendi — tarayıcı izin verin.';return;}
-    document.getElementById('bm_user_link').value='';
-    status.textContent=`✅ Gönderildi: ${user}`;
-  });
 
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
     if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();}
   });
 
+  // === Temayı uygula ve olayları bağla ===
   applyTheme();
+  attachEvents();
 })();
