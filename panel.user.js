@@ -10,6 +10,7 @@
 
 (function(){
   'use strict';
+
   const PREF_KEY = "bm_panel_prefs_v7";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -28,6 +29,7 @@
   };
   let c = getTheme();
 
+  // === Toggle Button ===
   const toggleBtn=document.createElement('button');
   Object.assign(toggleBtn.style,{
     position:'fixed',top:'14px',right:'14px',padding:'5px 9px',
@@ -37,16 +39,32 @@
   toggleBtn.textContent="📝 Brainly";
   document.body.appendChild(toggleBtn);
 
+  // === Panel ===
   const panel=document.createElement('div');
   Object.assign(panel.style,{
-    position:'fixed',top:panelY?panelY+'px':'70px',right:panelX?null:'10px',left:panelX?panelX+'px':null,
-    width:panelWidth+'px',height:panelHeight+'px',
-    background:c.bg,color:c.fg,border:`1.5px solid ${c.border}`,
-    zIndex:9999998,fontFamily:'Arial,sans-serif',fontSize:'12.5px',
-    borderRadius:'8px',overflowY:'auto',resize:'both',
-    minWidth:'200px',minHeight:'250px',maxWidth:'600px',maxHeight:'800px',
-    boxSizing:'border-box',paddingBottom:'10px',
-    boxShadow:'0 3px 10px rgba(0,0,0,0.25)',display:'none'
+    position:'fixed',
+    top:panelY?panelY+'px':'70px',
+    left:panelX?panelX+'px':null,
+    right:panelX?null:'10px',
+    width:panelWidth+'px',
+    height:panelHeight+'px',
+    background:c.bg,
+    color:c.fg,
+    border:`1.5px solid ${c.border}`,
+    zIndex:9999998,
+    fontFamily:'Arial,sans-serif',
+    fontSize:'12.5px',
+    borderRadius:'8px',
+    overflowY:'auto',
+    resize:'both',
+    minWidth:'200px',
+    minHeight:'250px',
+    maxWidth:'600px',
+    maxHeight:'800px',
+    boxSizing:'border-box',
+    paddingBottom:'10px',
+    boxShadow:'0 3px 10px rgba(0,0,0,0.25)',
+    display:'none'
   });
 
   const header=document.createElement('div');
@@ -60,62 +78,122 @@
 
   const content=document.createElement('div');
   content.style.padding="8px";
-  content.innerHTML=`<input id="bm_user_link" type="text" placeholder="Kullanıcı profil linki (https://...)"/>
-  <label>Action Taken</label>
-  <select id="bm_action">
-   <option value="action_taken_moderators_24_hour_suspension">Kullanıcı 24 saat yasaklandı</option>
-   <option value="action_taken_moderators_72_hour_suspension">Kullanıcı 72 saat yasaklandı</option>
-    <option value="action_taken_moderators_banned_the_user" selected>Kullanıcı yasaklandı</option>
-  </select>
-  <label>Policy Violation</label>
-  <select id="bm_policy">
-     <option value="spam" selected>Meet Bağlantıları</option>
-    <option value="ticari_spam">Ticari Spam</option>
-    <option value="kufur">Küfür</option>
-    <option value="benzerlik_spami">Benzerlik Spamı</option>
-    <option value="zorbalik">Zorbalık</option>
-    <option value="taciz">Taciz</option>
-    <option value="terorist_icerik">Terörist İçerik</option>
-    <option value="intihal">İntihal</option>
-    <option value="nefret_soylemi">Nefret Söylemi</option>
-    <option value="mustehcenlik">Müstehcenlik</option>
-    <option value="other">Diğer</option>
-  </select>
-  <label>Market</label>
-  <select id="bm_market"><option value="turkey_clone" selected>Turkey</option></select>
-  <button id="bm_send">Gönder</button>
-  <div id="bm_status"></div><hr>
-  <button id="bm_toggleTheme">🌓 Tema Değiştir</button>
-  <button id="bm_syncToggle">🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}</button>`;
+  content.innerHTML=`
+    <input id="bm_user_link" type="text" placeholder="Kullanıcı profil linki (https://...)" />
+    <label>Action Taken</label>
+    <select id="bm_action">
+     <option value="action_taken_moderators_24_hour_suspension">Kullanıcı 24 saat yasaklandı</option>
+     <option value="action_taken_moderators_72_hour_suspension">Kullanıcı 72 saat yasaklandı</option>
+      <option value="action_taken_moderators_banned_the_user" selected>Kullanıcı yasaklandı</option>
+    </select>
+    <label>Policy Violation</label>
+    <select id="bm_policy">
+       <option value="spam" selected>Meet Bağlantıları</option>
+      <option value="ticari_spam">Ticari Spam</option>
+      <option value="kufur">Küfür</option>
+      <option value="benzerlik_spami">Benzerlik Spamı</option>
+      <option value="zorbalik">Zorbalık</option>
+      <option value="taciz">Taciz</option>
+      <option value="terorist_icerik">Terörist İçerik</option>
+      <option value="intihal">İntihal</option>
+      <option value="nefret_soylemi">Nefret Söylemi</option>
+      <option value="mustehcenlik">Müstehcenlik</option>
+      <option value="other">Diğer</option>
+    </select>
+    <label>Market (optional)</label>
+    <select id="bm_market">
+      <option value="turkey_clone" selected>Turkey</option>
+    </select>
+    <button id="bm_send">Gönder</button>
+    <div id="bm_status"></div>
+    <hr>
+    <button id="bm_toggleTheme">🌓 Tema Değiştir</button>
+    <button id="bm_syncToggle">🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}</button>
+  `;
   panel.appendChild(content);
   document.body.appendChild(panel);
 
+  // === CSS ===
   const style=document.createElement('style');
-  style.textContent=`#bm_user_link,#bm_action,#bm_policy,#bm_market{width:100%;padding:6px;margin:5px 0 8px 0;box-sizing:border-box;border-radius:4px;font-size:12px;outline:none;}
-  #bm_send,#bm_toggleTheme,#bm_syncToggle{width:100%;padding:7px;margin-top:5px;border:none;border-radius:5px;cursor:pointer;font-weight:bold;font-size:12.5px;transition:background 0.2s ease;}
-  #bm_send:hover{opacity:0.9;}#bm_toggleTheme:hover,#bm_syncToggle:hover{filter:brightness(1.1);}
-  #bm_status{margin-top:5px;font-family:monospace;font-size:11.5px;white-space:pre-wrap;}`;
+  style.textContent=`
+    #bm_user_link,#bm_action,#bm_policy,#bm_market{
+      width:100%;padding:6px;margin:5px 0 8px 0;box-sizing:border-box;
+      border-radius:4px;font-size:12px;outline:none;
+    }
+    #bm_send,#bm_toggleTheme,#bm_syncToggle{
+      width:100%;padding:7px;margin-top:5px;
+      border:none;border-radius:5px;
+      cursor:pointer;font-weight:bold;font-size:12.5px;
+      transition:background 0.2s ease;
+    }
+    #bm_send:hover{opacity:0.9;}
+    #bm_toggleTheme:hover,#bm_syncToggle:hover{filter:brightness(1.1);}
+    #bm_status{margin-top:5px;font-family:monospace;font-size:11.5px;white-space:pre-wrap;}
+  `;
   document.head.appendChild(style);
 
-  const applyTheme=()=>{c=getTheme();panel.style.background=c.bg;panel.style.color=c.fg;panel.style.border=`1.5px solid ${c.border}`;header.style.background=c.header;
-    document.querySelectorAll('#bm_user_link,#bm_action,#bm_policy,#bm_market').forEach(el=>{el.style.background=c.inputBg;el.style.border=`1px solid ${c.inputBorder}`;el.style.color=c.fg;});
-    const send=document.getElementById('bm_send');const theme=document.getElementById('bm_toggleTheme');const sync=document.getElementById('bm_syncToggle');
-    send.style.background=c.accent;send.style.color='#fff';[theme,sync].forEach(b=>{b.style.background=c.btnBg;b.style.border=`1px solid ${c.btnBorder}`;b.style.color=c.fg;});
+  // === Tema Uygula ===
+  const applyTheme=()=>{
+    c=getTheme();
+    panel.style.background=c.bg;panel.style.color=c.fg;panel.style.border=`1.5px solid ${c.border}`;
+    header.style.background=c.header;
+    document.querySelectorAll('#bm_user_link,#bm_action,#bm_policy,#bm_market').forEach(el=>{
+      el.style.background=c.inputBg;el.style.border=`1px solid ${c.inputBorder}`;el.style.color=c.fg;
+    });
+    const send=document.getElementById('bm_send');
+    const theme=document.getElementById('bm_toggleTheme');
+    const sync=document.getElementById('bm_syncToggle');
+    send.style.background=c.accent;send.style.color='#fff';
+    [theme,sync].forEach(b=>{
+      b.style.background=c.btnBg;
+      b.style.border=`1px solid ${c.btnBorder}`;
+      b.style.color=c.fg;
+      b.disabled=false;
+      b.style.pointerEvents='auto';
+    });
   };
 
-  const savePrefs=()=>{localStorage.setItem(PREF_KEY,JSON.stringify({isDarkMode,autoSync,panelWidth:panel.offsetWidth,panelHeight:panel.offsetHeight,panelX:panel.offsetLeft,panelY:panel.offsetTop}));};
+  const savePrefs=()=>{
+    localStorage.setItem(PREF_KEY,JSON.stringify({
+      isDarkMode,autoSync,
+      panelWidth:panel.offsetWidth,panelHeight:panel.offsetHeight,
+      panelX:panel.offsetLeft,panelY:panel.offsetTop
+    }));
+  };
 
-  document.getElementById('bm_toggleTheme').addEventListener('click',()=>{isDarkMode=!isDarkMode;applyTheme();savePrefs();});
-  document.getElementById('bm_syncToggle').addEventListener('click',()=>{autoSync=!autoSync;document.getElementById('bm_syncToggle').textContent=`🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}`;savePrefs();});
-  toggleBtn.addEventListener('click',()=>{panel.style.display=panel.style.display==="none"?"block":"none";});
+  // === Tema & Senkron ===
+  document.getElementById('bm_toggleTheme').addEventListener('click',()=>{
+    isDarkMode=!isDarkMode;applyTheme();savePrefs();
+  });
+  document.getElementById('bm_syncToggle').addEventListener('click',()=>{
+    autoSync=!autoSync;
+    document.getElementById('bm_syncToggle').textContent=`🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}`;
+    savePrefs();
+  });
+  toggleBtn.addEventListener('click',()=>{
+    panel.style.display=panel.style.display==="none"?"block":"none";
+  });
 
+  // === Sürükleme ===
   let dragging=false,offsetX=0,offsetY=0;
-  header.addEventListener('mousedown',e=>{dragging=true;offsetX=e.clientX-panel.offsetLeft;offsetY=e.clientY-panel.offsetTop;header.style.cursor='grabbing';});
-  document.addEventListener('mousemove',e=>{if(!dragging)return;panel.style.left=(e.clientX-offsetX)+'px';panel.style.top=(e.clientY-offsetY)+'px';panel.style.right='auto';});
-  document.addEventListener('mouseup',()=>{if(dragging){dragging=false;header.style.cursor='move';savePrefs();}});
+  header.addEventListener('mousedown',e=>{
+    dragging=true;offsetX=e.clientX-panel.offsetLeft;offsetY=e.clientY-panel.offsetTop;
+    header.style.cursor='grabbing';
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!dragging)return;
+    panel.style.left=(e.clientX-offsetX)+'px';
+    panel.style.top=(e.clientY-offsetY)+'px';
+    panel.style.right='auto';
+  });
+  document.addEventListener('mouseup',()=>{
+    if(dragging){dragging=false;header.style.cursor='move';savePrefs();}
+  });
 
+  // === Resize Kaydet ===
   new ResizeObserver(()=>savePrefs()).observe(panel);
 
+  // === Gönder ===
   document.getElementById('bm_send').addEventListener('click',()=>{
     const user=document.getElementById('bm_user_link').value.trim();
     if(!user){alert('Kullanıcı linkini gir.');return;}
@@ -128,6 +206,10 @@
     status.textContent=`✅ Gönderildi: ${user}`;
   });
 
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();}});
+  // === Sistem Temasıyla Senkronizasyon ===
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
+    if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();}
+  });
+
   applyTheme();
 })();
