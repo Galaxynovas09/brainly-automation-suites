@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Fixed Right + Draggable)
+// @name         Brainly Moderation Panel PLUS5 (Fixed Right + Draggable Stable)
 // @namespace    http://tampermonkey.net/
-// @version      2.4
-// @description  Roma Form Paneli
+// @version      2.5
+// @description  Moderasyon Paneli
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -10,7 +10,6 @@
 
 (function(){
   'use strict';
-
   const PREF_KEY = "bm_panel_prefs_v10";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
 
@@ -18,8 +17,9 @@
   let autoSync = saved.autoSync ?? true;
   let panelWidth = saved.panelWidth ?? 270;
   let panelHeight = saved.panelHeight ?? 420;
-  let panelX = saved.panelX ?? (window.innerWidth - panelWidth - 20);
-  let panelY = saved.panelY ?? 70;
+  // Eğer konum daha önce kaydedilmemişse SAĞDA başlasın
+  let panelX = (typeof saved.panelX === "number") ? saved.panelX : (window.innerWidth - panelWidth - 20);
+  let panelY = (typeof saved.panelY === "number") ? saved.panelY : 70;
 
   const getTheme = () => isDarkMode ? {
     bg:'#181818', fg:'#f1f1f1', border:'#3f51b5', accent:'#2196f3', header:'#1976d2',
@@ -30,7 +30,8 @@
   };
   let c = getTheme();
 
-  const toggleBtn=document.createElement('button');
+  // --- Buton ---
+  const toggleBtn = document.createElement('button');
   Object.assign(toggleBtn.style,{
     position:'fixed',top:'14px',right:'14px',padding:'5px 9px',
     backgroundColor:c.accent,color:'#fff',border:'none',borderRadius:'5px',
@@ -39,7 +40,8 @@
   toggleBtn.textContent="📝 Brainly";
   document.body.appendChild(toggleBtn);
 
-  const panel=document.createElement('div');
+  // --- Panel ---
+  const panel = document.createElement('div');
   Object.assign(panel.style,{
     position:'fixed',
     top: panelY + 'px',
@@ -82,21 +84,21 @@
     <select id="bm_action">
      <option value="action_taken_moderators_24_hour_suspension">Kullanıcı 24 saat yasaklandı</option>
      <option value="action_taken_moderators_72_hour_suspension">Kullanıcı 72 saat yasaklandı</option>
-      <option value="action_taken_moderators_banned_the_user" selected>Kullanıcı yasaklandı</option>
+     <option value="action_taken_moderators_banned_the_user" selected>Kullanıcı yasaklandı</option>
     </select>
     <label>Policy Violation</label>
     <select id="bm_policy">
        <option value="spam" selected>Meet Bağlantıları</option>
-      <option value="ticari_spam">Ticari Spam</option>
-      <option value="kufur">Küfür</option>
-      <option value="benzerlik_spami">Benzerlik Spamı</option>
-      <option value="zorbalik">Zorbalık</option>
-      <option value="taciz">Taciz</option>
-      <option value="terorist_icerik">Terörist İçerik</option>
-      <option value="intihal">İntihal</option>
-      <option value="nefret_soylemi">Nefret Söylemi</option>
-      <option value="mustehcenlik">Müstehcenlik</option>
-      <option value="other">Diğer</option>
+       <option value="ticari_spam">Ticari Spam</option>
+       <option value="kufur">Küfür</option>
+       <option value="benzerlik_spami">Benzerlik Spamı</option>
+       <option value="zorbalik">Zorbalık</option>
+       <option value="taciz">Taciz</option>
+       <option value="terorist_icerik">Terörist İçerik</option>
+       <option value="intihal">İntihal</option>
+       <option value="nefret_soylemi">Nefret Söylemi</option>
+       <option value="mustehcenlik">Müstehcenlik</option>
+       <option value="other">Diğer</option>
     </select>
     <label>Market (optional)</label>
     <select id="bm_market">
@@ -111,6 +113,7 @@
   panel.appendChild(content);
   document.body.appendChild(panel);
 
+  // --- Stil ---
   const style=document.createElement('style');
   style.textContent=`
     #bm_user_link,#bm_action,#bm_policy,#bm_market{
@@ -152,8 +155,7 @@
   const savePrefs=()=>{
     const rect = panel.getBoundingClientRect();
     localStorage.setItem(PREF_KEY, JSON.stringify({
-      isDarkMode,
-      autoSync,
+      isDarkMode,autoSync,
       panelWidth: rect.width,
       panelHeight: rect.height,
       panelX: rect.left,
@@ -161,10 +163,19 @@
     }));
   };
 
-  document.getElementById('bm_toggleTheme').addEventListener('click',()=>{isDarkMode=!isDarkMode;applyTheme();savePrefs();});
-  document.getElementById('bm_syncToggle').addEventListener('click',()=>{autoSync=!autoSync;document.getElementById('bm_syncToggle').textContent=`🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}`;savePrefs();});
-  toggleBtn.addEventListener('click',()=>{panel.style.display=panel.style.display==="none"?"block":"none";});
+  document.getElementById('bm_toggleTheme').addEventListener('click',()=>{
+    isDarkMode=!isDarkMode;applyTheme();savePrefs();
+  });
+  document.getElementById('bm_syncToggle').addEventListener('click',()=>{
+    autoSync=!autoSync;
+    document.getElementById('bm_syncToggle').textContent=`🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}`;
+    savePrefs();
+  });
+  toggleBtn.addEventListener('click',()=>{
+    panel.style.display=panel.style.display==="none"?"block":"none";
+  });
 
+  // --- Sürükleme ---
   let dragging=false,offsetX=0,offsetY=0;
   header.addEventListener('mousedown',e=>{
     dragging=true;
@@ -176,22 +187,19 @@
     if(!dragging)return;
     panelX = e.clientX - offsetX;
     panelY = e.clientY - offsetY;
-
+    // Ekran sınırlarını aşmasın
     panelX = Math.max(0, Math.min(window.innerWidth - panel.offsetWidth, panelX));
     panelY = Math.max(0, Math.min(window.innerHeight - 100, panelY));
     panel.style.left = panelX + 'px';
     panel.style.top = panelY + 'px';
   });
   document.addEventListener('mouseup',()=>{
-    if(dragging){
-      dragging=false;
-      header.style.cursor='move';
-      savePrefs();
-    }
+    if(dragging){dragging=false;header.style.cursor='move';savePrefs();}
   });
 
   new ResizeObserver(()=>savePrefs()).observe(panel);
 
+  // --- Gönder butonu ---
   document.getElementById('bm_send').addEventListener('click',()=>{
     const user=document.getElementById('bm_user_link').value.trim();
     if(!user){alert('Kullanıcı linkini gir.');return;}
