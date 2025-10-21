@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Right Fixed + Persistent Size/Position)
+// @name         Brainly Moderation Panel PLUS5 (Right Fixed + Resizable + Persistent)
 // @namespace    http://tampermonkey.net/
-// @version      2.7
-// @description  moderasyon paneli
+// @version      2.8
+// @description   moderasyon paneli
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -10,16 +10,14 @@
 
 (function(){
   'use strict';
-  const PREF_KEY = "bm_panel_prefs_v12";
+  const PREF_KEY = "bm_panel_prefs_v13";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
 
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
   let autoSync = saved.autoSync ?? true;
-  let panelWidth = saved.panelWidth ?? 180;
-  let panelHeight = saved.panelHeight ?? 400;
-
-  // 🧭 Sağda sabit pozisyon – sayfa her yüklendiğinde sağdan ölçülür
-  const panelRight = saved.panelRight ?? 20;
+  let panelWidth = saved.panelWidth ?? 200;
+  let panelHeight = saved.panelHeight ?? 420;
+  let panelRight = saved.panelRight ?? 20;
   let panelY = saved.panelY ?? 80;
 
   const getTheme = () => isDarkMode ? {
@@ -61,7 +59,11 @@
     boxSizing:'border-box',
     paddingBottom:'10px',
     boxShadow:'0 3px 10px rgba(0,0,0,0.25)',
-    display:'none'
+    display:'none',
+    minWidth:'150px',
+    minHeight:'250px',
+    maxWidth:'600px',
+    maxHeight:'800px'
   });
 
   const header=document.createElement('div');
@@ -159,7 +161,7 @@
     panel.style.display=panel.style.display==="none"?"block":"none";
   });
 
-  // Sürükleme (sağ sabit olacak)
+  // Dikey sürükleme (sağ sabit)
   let dragging=false,offsetY=0;
   header.addEventListener('mousedown',e=>{
     dragging=true;
@@ -174,7 +176,10 @@
   });
   document.addEventListener('mouseup',()=>{ if(dragging){dragging=false;header.style.cursor='move';savePrefs();} });
 
-  // === Tema ve senkron butonları ===
+  // Boyut değişimi kaydedilsin
+  new ResizeObserver(savePrefs).observe(panel);
+
+  // Tema & senkron
   document.addEventListener('click',e=>{
     if(e.target.id==='bm_toggleTheme'){ isDarkMode=!isDarkMode;applyTheme();savePrefs(); }
     if(e.target.id==='bm_syncToggle'){
