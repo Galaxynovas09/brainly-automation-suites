@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Fixed Right + Draggable Stable)
+// @name         Brainly Moderation Panel PLUS5 (Right Fixed + Drag Persist)
 // @namespace    http://tampermonkey.net/
-// @version      2.5
-// @description  Moderasyon Paneli
+// @version      2.6
+// @description  moderasyon paneli
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -10,16 +10,18 @@
 
 (function(){
   'use strict';
-  const PREF_KEY = "bm_panel_prefs_v10";
+  const PREF_KEY = "bm_panel_prefs_v11";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
 
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
   let autoSync = saved.autoSync ?? true;
   let panelWidth = saved.panelWidth ?? 270;
   let panelHeight = saved.panelHeight ?? 420;
-  // Eğer konum daha önce kaydedilmemişse SAĞDA başlasın
-  let panelX = (typeof saved.panelX === "number") ? saved.panelX : (window.innerWidth - panelWidth - 20);
-  let panelY = (typeof saved.panelY === "number") ? saved.panelY : 70;
+
+  // 🚀 Sağda sabit başlangıç — kaydedilen konum varsa onu kullan
+  let hasCustomPos = typeof saved.panelX === "number" && typeof saved.panelY === "number";
+  let panelX = hasCustomPos ? saved.panelX : (window.innerWidth - panelWidth - 20);
+  let panelY = hasCustomPos ? saved.panelY : 70;
 
   const getTheme = () => isDarkMode ? {
     bg:'#181818', fg:'#f1f1f1', border:'#3f51b5', accent:'#2196f3', header:'#1976d2',
@@ -30,8 +32,7 @@
   };
   let c = getTheme();
 
-  // --- Buton ---
-  const toggleBtn = document.createElement('button');
+  const toggleBtn=document.createElement('button');
   Object.assign(toggleBtn.style,{
     position:'fixed',top:'14px',right:'14px',padding:'5px 9px',
     backgroundColor:c.accent,color:'#fff',border:'none',borderRadius:'5px',
@@ -40,8 +41,7 @@
   toggleBtn.textContent="📝 Brainly";
   document.body.appendChild(toggleBtn);
 
-  // --- Panel ---
-  const panel = document.createElement('div');
+  const panel=document.createElement('div');
   Object.assign(panel.style,{
     position:'fixed',
     top: panelY + 'px',
@@ -113,7 +113,6 @@
   panel.appendChild(content);
   document.body.appendChild(panel);
 
-  // --- Stil ---
   const style=document.createElement('style');
   style.textContent=`
     #bm_user_link,#bm_action,#bm_policy,#bm_market{
@@ -187,14 +186,17 @@
     if(!dragging)return;
     panelX = e.clientX - offsetX;
     panelY = e.clientY - offsetY;
-    // Ekran sınırlarını aşmasın
     panelX = Math.max(0, Math.min(window.innerWidth - panel.offsetWidth, panelX));
     panelY = Math.max(0, Math.min(window.innerHeight - 100, panelY));
     panel.style.left = panelX + 'px';
     panel.style.top = panelY + 'px';
   });
   document.addEventListener('mouseup',()=>{
-    if(dragging){dragging=false;header.style.cursor='move';savePrefs();}
+    if(dragging){
+      dragging=false;
+      header.style.cursor='move';
+      savePrefs();
+    }
   });
 
   new ResizeObserver(()=>savePrefs()).observe(panel);
