@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Stable + Mobile)
+// @name         Brainly Moderation Panel PLUS5 (Stable + Mobile Fixed)
 // @namespace    http://tampermonkey.net/
-// @version      2.1
-// @description  Roma formu moderasyon paneli (mobil uyumlu, sürüklenebilir, boyutlanabilir)
+// @version      2.2
+// @description  Roma formu moderasyon paneli (mobil uyumlu, sabit, taşınabilir, boyutlanabilir)
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -11,7 +11,7 @@
 (function(){
   'use strict';
 
-  const PREF_KEY = "bm_panel_prefs_v7";
+  const PREF_KEY = "bm_panel_prefs_v8";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
   let autoSync = saved.autoSync ?? true;
@@ -39,12 +39,12 @@
   const panel=document.createElement('div');
   Object.assign(panel.style,{
     position:'fixed',top:'60px',left:'50%',transform:'translateX(-50%)',
-    width:'min(90vw, 320px)',height:'min(85vh, 460px)',
+    width:'min(95vw, 320px)',height:'min(85vh, 460px)',
     background:c.bg,color:c.fg,border:`1.5px solid ${c.border}`,
     zIndex:9999998,fontFamily:'Arial,sans-serif',fontSize:'13px',
     borderRadius:'10px',overflowY:'auto',resize:'both',
     boxSizing:'border-box',paddingBottom:'10px',
-    boxShadow:'0 3px 12px rgba(0,0,0,0.25)',display:'none'
+    boxShadow:'0 3px 12px rgba(0,0,0,0.25)',display:'block'
   });
 
   const header=document.createElement('div');
@@ -139,9 +139,12 @@
     document.getElementById('bm_syncToggle').textContent=`🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}`;
     savePrefs();
   });
-  toggleBtn.addEventListener('click',()=>{
-    panel.style.display=panel.style.display==="none"?"block":"none";
-  });
+
+  const togglePanel=()=>{
+    panel.style.display = (panel.style.display==="none") ? "block" : "none";
+  };
+  toggleBtn.addEventListener('click',togglePanel);
+  toggleBtn.addEventListener('touchstart',togglePanel);
 
   // === Dokunmatik + Fare ile Sürükleme ===
   let dragging=false,startX=0,startY=0,offsetX=0,offsetY=0;
