@@ -2,7 +2,7 @@
 // @name         Brainly Moderation Panel PLUS5 (Right Fixed 5px + Fixed Size)
 // @namespace    http://tampermonkey.net/
 // @version      3.2
-// @description  moderasyon paneli 
+// @description  moderasyon paneli
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -15,7 +15,7 @@
 
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
   let autoSync = saved.autoSync ?? true;
-  const panelWidth = 200;   // ✅ SABİT GENİŞLİK
+  const panelWidth = 250;   // ✅ Panelin genişliği artırıldı
   const panelHeight = 420;  // ✅ SABİT YÜKSEKLİK
   let panelY = saved.panelY ?? 80; // sadece dikey pozisyon kaydedilecek
   const RIGHT_OFFSET = 5; // ✅ Sağdan 5px içeride
@@ -59,7 +59,8 @@
     boxSizing:'border-box',
     paddingBottom:'10px',
     boxShadow:'-3px 0 10px rgba(0,0,0,0.25)',
-    display:'none'
+    display:'none',
+    textAlign: 'center' // ✅ Yazıları ortalamak için eklendi
   });
 
   const header=document.createElement('div');
@@ -73,7 +74,7 @@
 
   const content=document.createElement('div');
   content.style.padding="8px";
-  content.innerHTML=`
+  content.innerHTML=` 
     <input id="bm_user_link" type="text" placeholder="Kullanıcı profil linki (https://...)" />
     <label>Action Taken</label>
     <select id="bm_action">
@@ -108,7 +109,7 @@
   document.body.appendChild(panel);
 
   const style=document.createElement('style');
-  style.textContent=`
+  style.textContent=` 
     #bm_user_link,#bm_action,#bm_policy,#bm_market{
       width:100%;padding:6px;margin:5px 0 8px 0;box-sizing:border-box;
       border-radius:4px;font-size:12px;outline:none;
