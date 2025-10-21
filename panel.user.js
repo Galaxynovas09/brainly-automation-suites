@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Fixed Global Position)
+// @name         Brainly Moderation Panel PLUS5 (Fixed Right + Draggable)
 // @namespace    http://tampermonkey.net/
-// @version      2.2
-// @description  Tüm sitelerde aynı konumda açılan sabit moderasyon paneli
+// @version      2.4
+// @description  Sağda sabit konumda açılan, sürüklenebilir moderasyon paneli (boyut ve tema koruma)
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -11,14 +11,13 @@
 (function(){
   'use strict';
 
-  const PREF_KEY = "bm_panel_prefs_v8";
+  const PREF_KEY = "bm_panel_prefs_v10";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
 
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
   let autoSync = saved.autoSync ?? true;
   let panelWidth = saved.panelWidth ?? 270;
   let panelHeight = saved.panelHeight ?? 420;
-  // 💡 Pozisyon sabit, viewport koordinatına göre kaydedilecek
   let panelX = saved.panelX ?? (window.innerWidth - panelWidth - 20);
   let panelY = saved.panelY ?? 70;
 
@@ -174,15 +173,29 @@
 
   // === Sürükleme ===
   let dragging=false,offsetX=0,offsetY=0;
-  header.addEventListener('mousedown',e=>{dragging=true;offsetX=e.clientX-panelX;offsetY=e.clientY-panelY;header.style.cursor='grabbing';});
+  header.addEventListener('mousedown',e=>{
+    dragging=true;
+    offsetX=e.clientX - panel.getBoundingClientRect().left;
+    offsetY=e.clientY - panel.getBoundingClientRect().top;
+    header.style.cursor='grabbing';
+  });
   document.addEventListener('mousemove',e=>{
     if(!dragging)return;
     panelX = e.clientX - offsetX;
     panelY = e.clientY - offsetY;
+    // Ekrandan taşmayı önle
+    panelX = Math.max(0, Math.min(window.innerWidth - panel.offsetWidth, panelX));
+    panelY = Math.max(0, Math.min(window.innerHeight - 100, panelY));
     panel.style.left = panelX + 'px';
     panel.style.top = panelY + 'px';
   });
-  document.addEventListener('mouseup',()=>{if(dragging){dragging=false;header.style.cursor='move';savePrefs();}});
+  document.addEventListener('mouseup',()=>{
+    if(dragging){
+      dragging=false;
+      header.style.cursor='move';
+      savePrefs();
+    }
+  });
 
   // === Resize Kaydet ===
   new ResizeObserver(()=>savePrefs()).observe(panel);
