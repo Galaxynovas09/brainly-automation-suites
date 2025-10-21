@@ -182,4 +182,4 @@
   });
 
   applyTheme();
-})();  bunu githuba kayıt edecek şekilde yap
+})();
