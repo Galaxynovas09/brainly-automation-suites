@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Right Locked + Always Active Buttons)
+// @name         Brainly Moderation Panel PLUS5 (Right Fixed 5px + Persistent)
 // @namespace    http://tampermonkey.net/
-// @version      3.0
-// @description  moderasyon paneli
+// @version      3.1
+// @description  Panel her sekmede sağdan 5px içeride sabit, butonlar her koşulda aktif
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -10,14 +10,16 @@
 
 (function(){
   'use strict';
-  const PREF_KEY = "bm_panel_prefs_v15";
+  const PREF_KEY = "bm_panel_prefs_v16";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
 
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
   let autoSync = saved.autoSync ?? true;
   let panelWidth = saved.panelWidth ?? 200;
   let panelHeight = saved.panelHeight ?? 420;
-  let panelY = saved.panelY ?? 80; // sadece dikey pozisyon kaydedilecek (sağ sabit)
+  let panelY = saved.panelY ?? 80; // sadece dikey pozisyon kaydedilecek
+
+  const RIGHT_OFFSET = 5; // ✅ Sağdan 5px içeride
 
   const getTheme = () => isDarkMode ? {
     bg:'#181818', fg:'#f1f1f1', border:'#3f51b5', accent:'#2196f3', header:'#1976d2',
@@ -43,12 +45,12 @@
   Object.assign(panel.style,{
     position:'fixed',
     top: panelY + 'px',
-    right: '0px', // 🔒 HER ZAMAN SAĞDA
+    right: RIGHT_OFFSET + 'px', // ✅ Sağdan 5px sabit
     width: panelWidth + 'px',
     height: panelHeight + 'px',
     background:c.bg,
     color:c.fg,
-    borderLeft:`2px solid ${c.border}`, // sağ kenarda olduğundan sol kenar vurgulu
+    borderLeft:`2px solid ${c.border}`,
     zIndex:9999998,
     fontFamily:'Arial,sans-serif',
     fontSize:'12.5px',
@@ -171,7 +173,7 @@
     document.getElementById('bm_user_link').value='';
   });
 
-  // 🔒 Sadece dikey sürükleme (sağda sabit)
+  // 🔒 Sadece dikey sürükleme
   let dragging=false,offsetY=0;
   header.addEventListener('mousedown',e=>{
     dragging=true;offsetY=e.clientY - panel.getBoundingClientRect().top;header.style.cursor='grabbing';
@@ -185,7 +187,6 @@
   document.addEventListener('mouseup',()=>{ if(dragging){dragging=false;header.style.cursor='move';savePrefs();} });
 
   new ResizeObserver(savePrefs).observe(panel);
-
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
     if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();}
   });
