@@ -15,7 +15,7 @@
 
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
   let autoSync = saved.autoSync ?? true;
-  const panelWidth = 200;   // ✅ SABİT GENİŞLİK
+  const panelWidth = 220;   // ✅ SABİT GENİŞLİK
   const panelHeight = 420;  // ✅ SABİT YÜKSEKLİK
   let panelY = saved.panelY ?? 80; // sadece dikey pozisyon kaydedilecek
   const RIGHT_OFFSET = 5; // ✅ Sağdan 5px içeride
