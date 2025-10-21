@@ -17,9 +17,9 @@
   let autoSync = saved.autoSync ?? true;
   let panelWidth = saved.panelWidth ?? 200;
   let panelHeight = saved.panelHeight ?? 420;
-  let panelY = saved.panelY ?? 80; 
+  let panelY = saved.panelY ?? 80; // sadece dikey pozisyon kaydedilecek
 
-  const RIGHT_OFFSET = 7; // ✅ 
+  const RIGHT_OFFSET = 7; // ✅ Sağdan 5px içeride
 
   const getTheme = () => isDarkMode ? {
     bg:'#181818', fg:'#f1f1f1', border:'#3f51b5', accent:'#2196f3', header:'#1976d2',
@@ -38,13 +38,13 @@
   });
   toggleBtn.textContent="📝 Brainly";
   document.body.appendChild(toggleBtn);
-
-  // === Panel ===
+  
   const panel=document.createElement('div');
   Object.assign(panel.style,{
     position:'fixed',
     top: panelY + 'px',
-    right: RIGHT_OFFSET + '7px', // ✅ 
+    right: RIGHT_OFFSET + 'px', // ✅ Sağdan 5px sabit
+    width: panelWidth + 'px',
     height: panelHeight + 'px',
     background:c.bg,
     color:c.fg,
@@ -106,7 +106,7 @@
     <div id="bm_status"></div>
     <hr>
     <button id="bm_toggleTheme">🌓 Tema Değiştir</button>
-    <button id="bm_syncToggle">🔁 Senkronizasyon: ${autoSync?"Açık":"Kapalı"}</button>
+    <button id="bm_syncToggle">🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}</button>
   `;
   panel.appendChild(content);
   document.body.appendChild(panel);
@@ -171,6 +171,7 @@
     document.getElementById('bm_user_link').value='';
   });
 
+  // 🔒 Sadece dikey sürükleme
   let dragging=false,offsetY=0;
   header.addEventListener('mousedown',e=>{
     dragging=true;offsetY=e.clientY - panel.getBoundingClientRect().top;header.style.cursor='grabbing';
