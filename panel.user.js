@@ -25,7 +25,6 @@
   };
   let c = getTheme();
 
-  // === Toggle Button ===
   const toggleBtn=document.createElement('button');
   Object.assign(toggleBtn.style,{
     position:'fixed',top:'12px',right:'12px',padding:'6px 10px',
@@ -35,12 +34,11 @@
   toggleBtn.textContent="📝 Brainly";
   document.body.appendChild(toggleBtn);
 
-  // === Panel ===
   const panel=document.createElement('div');
   Object.assign(panel.style,{
     position:'fixed',
     top:'60px',
-    right:'5px',            // ✅ Sağdan sabitlendi
+    right:'5px',            
     width:'280px',
     height:'min(85vh, 460px)',
     background:c.bg,color:c.fg,border:`1.5px solid ${c.border}`,
@@ -69,18 +67,27 @@
      <option value="action_taken_moderators_72_hour_suspension">Kullanıcı 72 saat yasaklandı</option>
       <option value="action_taken_moderators_banned_the_user" selected>Kullanıcı yasaklandı</option>
     </select>
-    <label>İhlal Türü</label>
+       <label>İhlal Türü</label>
     <select id="bm_policy">
-       <option value="spam" selected>Meet Bağlantıları</option>
+      <option value="benzerlik_spami" selected>Benzerlik Spamı</option>
+      <option value="spam">Meet Spam</option>
       <option value="ticari_spam">Ticari Spam</option>
       <option value="kufur">Küfür</option>
-      <option value="benzerlik_spami">Benzerlik Spamı</option>
-      <option value="zorbalik">Zorbalık</option>
-      <option value="taciz">Taciz</option>
-      <option value="terorist_icerik">Terörist İçerik</option>
-      <option value="intihal">İntihal</option>
-      <option value="nefret_soylemi">Nefret Söylemi</option>
+      <option value="zorbalik">Zorbalık / Taciz</option>
+      <option value="pornografi">Pornografi</option>
       <option value="mustehcenlik">Müstehcenlik</option>
+      <option value="nefret_soylemi">Nefret Söylemi</option>
+      <option value="kisisel_bilgi">Kişisel Bilgi Paylaşımı</option>
+      <option value="sahte_kimlik">Kimlik Sahtekarlığı</option>
+      <option value="cocuk_istismari">Çocuk İstismarı</option>
+      <option value="kendine_zarar">Kendine Zarar / İntihar</option>
+      <option value="terorist_icerik">Terörist İçerik</option>
+      <option value="siddet_tehdidi">Şiddet Tehdidi</option>
+      <option value="yanlis_bilgi">Yanlış Bilgi</option>
+      <option value="phishing">Phishing / Zararlı Yazılım</option>
+      <option value="intihal">Kopya / Sınav İhlali</option>
+      <option value="siddet_gorsel">Şiddet İçeren Görseller</option>
+      <option value="tehlikeli">Tehlikeli / Yasaklı İçerik</option>
       <option value="other">Diğer</option>
     </select>
     <label>Market</label>
@@ -96,10 +103,9 @@
   panel.appendChild(content);
   document.body.appendChild(panel);
 
-  // === CSS ===
   const style=document.createElement('style');
   style.textContent=`
-    #bm_user_link,#bm_action,#bm_policy,#bm_market{
+    #bm_ser_link,#bm_action,#bm_policy,#bm_market{
       width:100%;padding:8px;margin:6px 0 10px 0;box-sizing:border-box;
       border-radius:5px;font-size:13px;outline:none;
     }
@@ -149,7 +155,6 @@
   toggleBtn.addEventListener('click',togglePanel);
   toggleBtn.addEventListener('touchstart',togglePanel);
 
-  // === Gönder ===
   document.getElementById('bm_send').addEventListener('click',()=>{
     const user=document.getElementById('bm_user_link').value.trim();
     if(!user){alert('Kullanıcı linkini gir.');return;}
