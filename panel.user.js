@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Compact Modern UI + AutoUpdate + AutoDetect Profile + AutoBanDetect)
+// @name         Brainly Moderation Panel PLUS5 (Mobile Compatible + AutoDetect Link Duration + AutoUpdate + Manual Open)
 // @namespace    http://tampermonkey.net/
-// @version      6.1
-// @description  Roma Formu Moderasyon Paneli
+// @version      7.3
+// @description  Roma Formu Moderasyon Paneli (mobil + otomatik süre tespiti)
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
 // @downloadURL  https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
@@ -221,6 +221,46 @@
       }
     }
   }
+
+  async function autoDetectFromManualLink(url) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return;
+      const html = await res.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const listItems = doc.querySelectorAll("li");
+      const actionSelect = document.getElementById('bm_action');
+      for (const li of listItems) {
+        const text = li.textContent.trim();
+        if (!text.startsWith("SORULAR:")) continue;
+        const span = li.querySelector("span.orange");
+        if (!span) continue;
+        const value = span.textContent.trim();
+        if (value.includes("24 saatliğine askıya al")) {
+          actionSelect.value = "action_taken_moderators_24_hour_suspension";
+          return;
+        }
+        if (value.includes("72 saatliğine askıya al")) {
+          actionSelect.value = "action_taken_moderators_72_hour_suspension";
+          return;
+        }
+        if (value.includes("Yasakla")) {
+          actionSelect.value = "action_taken_moderators_banned_the_user";
+          return;
+        }
+      }
+    } catch (e) {
+      console.error("Otomatik süre tespiti başarısız:", e);
+    }
+  }
+
+  document.getElementById('bm_user_link').addEventListener('change', e => {
+    const url = e.target.value.trim();
+    if (url.startsWith("http")) {
+      autoDetectFromManualLink(url);
+    }
+  });
 
   window.addEventListener('load', () => setTimeout(detectProfileLink, 1000));
 
