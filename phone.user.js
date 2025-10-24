@@ -1,9 +1,11 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Stable + Mobile Fixed Scrollable Policy)
+// @name         Brainly Moderation Panel PLUS5 (Stable + Mobile Fixed Scrollable Policy + AutoUpdate)
 // @namespace    http://tampermonkey.net/
-// @version      3.7
+// @version      3.8
 // @description  Roma formu moderasyon paneli mobil uyumlu 
 // @match        *://*/*
+// @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
+// @downloadURL  https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
@@ -102,20 +104,13 @@
 
   const style=document.createElement('style');
   style.textContent=`
-    /* 🔹 İhlal Türü menüsüne kaydırma eklendi */
     #bm_policy {
       max-height: 140px;
       overflow-y: auto;
       scrollbar-width: thin;
     }
-    #bm_policy::-webkit-scrollbar {
-      width: 6px;
-    }
-    #bm_policy::-webkit-scrollbar-thumb {
-      background: ${isDarkMode ? "#555" : "#ccc"};
-      border-radius: 4px;
-    }
-
+    #bm_policy::-webkit-scrollbar {width: 6px;}
+    #bm_policy::-webkit-scrollbar-thumb {background: ${isDarkMode ? "#555" : "#ccc"};border-radius: 4px;}
     #bm_user_link,#bm_action,#bm_policy,#bm_market{
       width:100%;padding:8px;margin:6px 0 10px 0;box-sizing:border-box;
       border-radius:5px;font-size:13px;outline:none;
@@ -150,11 +145,7 @@
   const savePrefs=()=>{ localStorage.setItem(PREF_KEY,JSON.stringify({isDarkMode,autoSync})); };
 
   document.getElementById('bm_toggleTheme').addEventListener('click',()=>{ isDarkMode=!isDarkMode;applyTheme();savePrefs(); });
-  document.getElementById('bm_syncToggle').addEventListener('click',()=>{
-    autoSync=!autoSync;
-    document.getElementById('bm_syncToggle').textContent=`🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}`;
-    savePrefs();
-  });
+  document.getElementById('bm_syncToggle').addEventListener('click',()=>{ autoSync=!autoSync;document.getElementById('bm_syncToggle').textContent=`🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}`;savePrefs(); });
 
   const togglePanel=()=>{ panel.style.display = (panel.style.display==="none") ? "block" : "none"; };
   toggleBtn.addEventListener('click',togglePanel);
