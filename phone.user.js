@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Brainly Moderation Panel PLUS5 (Mobile Optimized for Kiwi Browser)
 // @namespace    http://tampermonkey.net/
-// @version      8.9m
+// @version      8.9
 // @description  Roma Formu Moderasyon Paneli 
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
