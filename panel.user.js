@@ -1,9 +1,11 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Compact Modern UI)
+// @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Compact Modern UI + AutoUpdate)
 // @namespace    http://tampermonkey.net/
-// @version      3.5
+// @version      3.7
 // @description  Roma Formu Moderasyon Paneli 
 // @match        *://*/*
+// @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
+// @downloadURL  https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
@@ -11,6 +13,7 @@
 (function(){
   'use strict';
 
+  const CURRENT_VERSION = "3.7";
   const PREF_KEY = "bm_panel_prefs_v8";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -41,7 +44,7 @@
   const panel=document.createElement('div');
   Object.assign(panel.style,{
     position:'fixed',top:'60px',right:'12px',
-    width:'280px',height:'400px',
+    width:'260px',height:'380px',
     background:c.bg,color:c.fg,border:`1.5px solid ${c.border}`,
     zIndex:9999998,fontFamily:'Inter, Arial, sans-serif',fontSize:'12.5px',
     borderRadius:'10px',overflowY:'auto',resize:'both',
@@ -141,7 +144,9 @@
     });
   };
 
-  document.getElementById('bm_toggleTheme').addEventListener('click',()=>{isDarkMode=!isDarkMode;applyTheme();savePrefs();});
+  document.getElementById('bm_toggleTheme').addEventListener('click',()=>{
+    isDarkMode=!isDarkMode;applyTheme();savePrefs();
+  });
   document.getElementById('bm_syncToggle').addEventListener('click',()=>{
     autoSync=!autoSync;
     document.getElementById('bm_syncToggle').textContent=`🔁 Senkron: ${autoSync?"Açık":"Kapalı"}`;
@@ -172,6 +177,23 @@
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
     if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();}
   });
+
+  fetch('https://raw.githubusercontent.com/Galaxynovas09/brainly-automation-suites/refs/heads/main/panel.user.js')
+    .then(r=>r.text())
+    .then(text=>{
+      const match = text.match(/@version\s+([0-9.]+)/);
+      if(match && match[1] && match[1] !== CURRENT_VERSION){
+        const note=document.createElement('div');
+        Object.assign(note.style,{
+          position:'fixed',bottom:'15px',right:'15px',background:'#2196f3',
+          color:'#fff',padding:'10px 14px',borderRadius:'8px',zIndex:99999999,
+          fontSize:'13px',fontWeight:'600',fontFamily:'Inter, Arial'
+        });
+        note.textContent="🆕 Yeni sürüm mevcut! Yenile veya Tampermonkey güncellemeleri kontrol et.";
+        document.body.appendChild(note);
+        setTimeout(()=>note.remove(),10000);
+      }
+    }).catch(()=>{});
 
   applyTheme();
 })();
