@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Stable + Right Fixed + Compact Modern UI + AutoDetect Profile + AutoUpdate)
+// @name         Brainly Moderation Panel PLUS5 (Stable + Right Fixed + Kiwi Browser Fix + AutoDetect Profile + AutoUpdate)
 // @namespace    http://tampermonkey.net/
-// @version      4.7
-// @description  Roma Formu Moderasyon Paneli Mobil Uyumlu 
+// @version      4.9
+// @description  Roma Formu Moderasyon Paneli Mobil Uyumlu
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
 // @downloadURL  https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
@@ -29,7 +29,6 @@
 
   const savePrefs = () => localStorage.setItem(PREF_KEY, JSON.stringify({isDarkMode, autoSync}));
 
-  // 🔘 Aç/Kapa butonu (sağ üstte)
   const toggleBtn=document.createElement('button');
   Object.assign(toggleBtn.style,{
     position:'fixed',top:'12px',right:'12px',padding:'6px 10px',
@@ -71,7 +70,7 @@
       <option value="action_taken_moderators_banned_the_user" selected>Kalıcı yasak</option>
     </select>
     <label>İhlal Türü</label>
-    <select id="bm_policy" size="1">
+    <select id="bm_policy">
       <option value="benzerlik_spami" selected>Benzerlik Spamı</option>
       <option value="spam">Meet Spam</option>
       <option value="ticari_spam">Ticari Spam</option>
@@ -133,66 +132,69 @@
     document.querySelectorAll('#bm_user_link,#bm_action,#bm_policy,#bm_market').forEach(el=>{
       el.style.background=c.inputBg;el.style.border=`1px solid ${c.inputBorder}`;el.style.color=c.fg;
     });
-    ['bm_send','bm_toggleTheme','bm_syncToggle'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el){el.style.background=c.btnBg;el.style.border=`1px solid ${c.btnBorder}`;el.style.color=c.fg;}
-    });
     const send=document.getElementById('bm_send');
+    const theme=document.getElementById('bm_toggleTheme');
+    const sync=document.getElementById('bm_syncToggle');
     send.style.background=c.accent;send.style.color='#fff';
+    [theme,sync].forEach(b=>{
+      b.style.background=c.btnBg;b.style.border=`1px solid ${c.btnBorder}`;b.style.color=c.fg;
+    });
   };
 
-  document.addEventListener('click',e=>{
-    if(e.target.id==='bm_toggleTheme'){isDarkMode=!isDarkMode;applyTheme();savePrefs();}
-    if(e.target.id==='bm_syncToggle'){
-      autoSync=!autoSync;
-      e.target.textContent=`🔁 Senkron: ${autoSync?"Açık":"Kapalı"}`;
-      savePrefs();
-    }
-    if(e.target.id==='bm_send'){
-      const user=document.getElementById('bm_user_link').value.trim();
-      if(!user){alert('Kullanıcı linkini gir.');return;}
-      const base='https://brainly-trustandsafety.zendesk.com/hc/en-us/requests/new?ticket_form_id=9719157534610';
-      const params=`&bm_user=${encodeURIComponent(user)}&bm_action=${encodeURIComponent(document.getElementById('bm_action').value)}&bm_policy=${encodeURIComponent(document.getElementById('bm_policy').value)}&bm_market=${encodeURIComponent(document.getElementById('bm_market').value)}`;
-      const w=window.open(base+params,'_blank');
-      const status=document.getElementById('bm_status');
-      if(!w){status.textContent='❌ Pop-up engellendi — izin verin.';return;}
-      document.getElementById('bm_user_link').value='';
-      status.textContent=`✅ Gönderildi: ${user}`;
-    }
-  });
-
-  // 🎚️ Aç/Kapat
   toggleBtn.addEventListener('click',()=>{
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    panel.style.display=(panel.style.display==='none')?'block':'none';
   });
 
-  // 🖱️ Sürüklenebilir başlık
   let dragging=false,offsetX=0,offsetY=0;
   header.addEventListener('mousedown',e=>{dragging=true;offsetX=e.clientX-panel.offsetLeft;offsetY=e.clientY-panel.offsetTop;});
   document.addEventListener('mousemove',e=>{if(dragging){panel.style.left=(e.clientX-offsetX)+'px';panel.style.top=(e.clientY-offsetY)+'px';}});
   document.addEventListener('mouseup',()=>dragging=false);
 
-  // 🔍 Profil linki otomatik algılama
-  function detectProfileLink(){
-    const url=window.location.href;
-    const input=document.getElementById('bm_user_link');
-    if(!input)return;
-    if(url.includes("/profil/")){
-      input.value=url.split("?")[0];
-    } else if(url.includes("/bans/ban/")){
-      const id=url.match(/ban\/(\d+)/)?.[1];
-      if(id)input.value=`https://eodev.com/profil/USER-${id}`;
-    }
+  function detectProfileLink() {
+    try {
+      const input = document.getElementById('bm_user_link');
+      if (!input) return;
+      const url = window.location.href;
+      if (url.includes("/profil/")) {
+        input.value = url.split("?")[0];
+      } else if (url.includes("/bans/ban/")) {
+        const id = url.match(/ban\/(\\d+)/)?.[1];
+        if (id) input.value = `https://eodev.com/profil/USER-${id}`;
+      }
+    } catch(e) {}
   }
-  window.addEventListener('load',()=>setTimeout(detectProfileLink,1000));
-  let lastUrl=location.href;
-  new MutationObserver(()=>{
-    if(location.href!==lastUrl){lastUrl=location.href;detectProfileLink();}
-  }).observe(document,{subtree:true,childList:true});
+
+  let lastCheck = "";
+  setInterval(()=>{
+    if(window.location.href !== lastCheck){
+      lastCheck = window.location.href;
+      detectProfileLink();
+    }
+  },800);
+
+  document.getElementById('bm_toggleTheme').addEventListener('click',()=>{isDarkMode=!isDarkMode;applyTheme();savePrefs();});
+  document.getElementById('bm_syncToggle').addEventListener('click',()=>{
+    autoSync=!autoSync;
+    document.getElementById('bm_syncToggle').textContent=`🔁 Senkron: ${autoSync?"Açık":"Kapalı"}`;
+    savePrefs();
+  });
+
+  document.getElementById('bm_send').addEventListener('click',()=>{
+    const user=document.getElementById('bm_user_link').value.trim();
+    if(!user){alert('Kullanıcı linkini gir.');return;}
+    const base='https://brainly-trustandsafety.zendesk.com/hc/en-us/requests/new?ticket_form_id=9719157534610';
+    const params=`&bm_user=${encodeURIComponent(user)}&bm_action=${encodeURIComponent(document.getElementById('bm_action').value)}&bm_policy=${encodeURIComponent(document.getElementById('bm_policy').value)}&bm_market=${encodeURIComponent(document.getElementById('bm_market').value)}`;
+    const w=window.open(base+params,'_blank');
+    const status=document.getElementById('bm_status');
+    if(!w){status.textContent='❌ Pop-up engellendi — izin verin.';return;}
+    document.getElementById('bm_user_link').value='';
+    status.textContent=`✅ Gönderildi: ${user}`;
+  });
 
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
     if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();}
   });
 
   applyTheme();
+  setTimeout(detectProfileLink,1500);
 })();
