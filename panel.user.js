@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Brainly Moderation Panel PLUS5 (Elegant UI + Mobile Right Fixed)
 // @namespace    http://tampermonkey.net/
-// @version      3.0
+// @version      3.1
 // @description  Roma formu moderasyon paneli 
 // @match        *://*/*
 // @grant        none
@@ -94,7 +94,7 @@
 
     <label>Market</label>
     <select id="bm_market">
-      <option value="turkey_clone" selected>Turkey</option>
+      <option value="turkey_clone" selected>Türkiye</option>
     </select>
 
     <button id="bm_send">🚀 Gönder</button>
