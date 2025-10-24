@@ -1,11 +1,9 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Auto Update + Right Fixed Compact)
+// @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Compact Modern UI)
 // @namespace    http://tampermonkey.net/
-// @version      4.2
+// @version      3.5
 // @description  Roma Formu Moderasyon Paneli 
 // @match        *://*/*
-// @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
-// @downloadURL  https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
@@ -27,71 +25,71 @@
   };
   let c = getTheme();
 
-  const savePrefs = () => localStorage.setItem(PREF_KEY, JSON.stringify({isDarkMode, autoSync}));
+  const savePrefs = () => {
+    localStorage.setItem(PREF_KEY, JSON.stringify({isDarkMode, autoSync}));
+  };
 
   const toggleBtn=document.createElement('button');
   Object.assign(toggleBtn.style,{
-    position:'fixed',top:'12px',right:'12px',padding:'6px 10px',
+    position:'fixed',top:'10px',right:'10px',padding:'5px 8px',
     backgroundColor:c.accent,color:'#fff',border:'none',borderRadius:'6px',
-    cursor:'pointer',zIndex:9999999,fontWeight:'bold',fontSize:'13px'
+    cursor:'pointer',zIndex:9999999,fontWeight:'600',fontSize:'12px'
   });
   toggleBtn.textContent="📝 Brainly";
   document.body.appendChild(toggleBtn);
 
   const panel=document.createElement('div');
   Object.assign(panel.style,{
-    position:'fixed',
-    top:'70px',                
-    right:'5px',             
-    width:'270px',              
-    height:'430px',           
+    position:'fixed',top:'60px',right:'12px',
+    width:'280px',height:'400px',
     background:c.bg,color:c.fg,border:`1.5px solid ${c.border}`,
-    zIndex:9999998,fontFamily:'Arial,sans-serif',fontSize:'13px',
-    borderRadius:'10px',overflowY:'auto',
+    zIndex:9999998,fontFamily:'Inter, Arial, sans-serif',fontSize:'12.5px',
+    borderRadius:'10px',overflowY:'auto',resize:'both',
     boxSizing:'border-box',paddingBottom:'10px',
-    boxShadow:'0 3px 12px rgba(0,0,0,0.25)',
+    boxShadow:'0 2px 10px rgba(0,0,0,0.25)',
     display:'none'
   });
 
   const header=document.createElement('div');
   header.textContent="Brainly Moderation Panel";
   Object.assign(header.style,{
-    background:c.header,color:'#fff',padding:'8px',
-    fontWeight:'600',textAlign:'center',fontSize:'13px',userSelect:'none'
+    background:c.header,color:'#fff',padding:'7px',cursor:'move',
+    fontWeight:'600',borderTopLeftRadius:'10px',borderTopRightRadius:'10px',
+    textAlign:'center',fontSize:'12.5px',userSelect:'none'
   });
   panel.appendChild(header);
 
   const content=document.createElement('div');
-  content.style.padding="10px";
+  content.style.padding="8px";
   content.innerHTML=`
-    <input id="bm_user_link" type="text" placeholder="Kullanıcı profil linki (https://...)" />
+    <input id="bm_user_link" type="text" placeholder="Kullanıcı linki (https://...)" />
     <label>Aksiyon</label>
     <select id="bm_action">
-     <option value="action_taken_moderators_24_hour_suspension">Kullanıcı 24 saat yasaklandı</option>
-     <option value="action_taken_moderators_72_hour_suspension">Kullanıcı 72 saat yasaklandı</option>
-      <option value="action_taken_moderators_banned_the_user" selected>Kullanıcı yasaklandı</option>
+      <option value="action_taken_moderators_24_hour_suspension">24 saat yasak</option>
+      <option value="action_taken_moderators_72_hour_suspension">72 saat yasak</option>
+      <option value="action_taken_moderators_banned_the_user" selected>Kalıcı yasak</option>
     </select>
-       <label>İhlal Türü</label>
+    <label>İhlal Türü</label>
     <select id="bm_policy">
       <option value="benzerlik_spami" selected>Benzerlik Spamı</option>
       <option value="spam">Meet Spam</option>
       <option value="ticari_spam">Ticari Spam</option>
       <option value="kufur">Küfür</option>
-      <option value="zorbalik">Zorbalık / Taciz</option>
+      <option value="zorbalik">Zorbalık</option>
       <option value="pornografi">Pornografi</option>
       <option value="mustehcenlik">Müstehcenlik</option>
       <option value="nefret_soylemi">Nefret Söylemi</option>
-      <option value="kisisel_bilgi">Kişisel Bilgi Paylaşımı</option>
-      <option value="sahte_kimlik">Kimlik Sahtekarlığı</option>
+      <option value="kisisel_bilgi">Kişisel Bilgi</option>
+      <option value="sahte_kimlik">Sahte Kimlik</option>
       <option value="cocuk_istismari">Çocuk İstismarı</option>
-      <option value="kendine_zarar">Kendine Zarar / İntihar</option>
+      <option value="kendine_zarar">Kendine Zarar</option>
       <option value="terorist_icerik">Terörist İçerik</option>
       <option value="siddet_tehdidi">Şiddet Tehdidi</option>
       <option value="yanlis_bilgi">Yanlış Bilgi</option>
-      <option value="phishing">Phishing / Zararlı Yazılım</option>
-      <option value="intihal">Kopya / Sınav İhlali</option>
-      <option value="siddet_gorsel">Şiddet İçeren Görseller</option>
-      <option value="tehlikeli">Tehlikeli / Yasaklı İçerik</option>
+      <option value="phishing">Phishing</option>
+      <option value="intihal">Kopya / Sınav</option>
+      <option value="siddet_gorsel">Şiddet Görseli</option>
+      <option value="tehlikeli">Tehlikeli İçerik</option>
       <option value="other">Diğer</option>
     </select>
     <label>Market</label>
@@ -101,33 +99,29 @@
     <button id="bm_send">Gönder</button>
     <div id="bm_status"></div>
     <hr>
-    <button id="bm_toggleTheme">🌓 Tema Değiştir</button>
-    <button id="bm_syncToggle">🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}</button>
+    <button id="bm_toggleTheme">🌓 Tema</button>
+    <button id="bm_syncToggle">🔁 Senkron: ${autoSync?"Açık":"Kapalı"}</button>
   `;
   panel.appendChild(content);
   document.body.appendChild(panel);
 
   const style=document.createElement('style');
   style.textContent=`
-    select, input {
-      width:100%;padding:8px;margin:6px 0 10px 0;box-sizing:border-box;
-      border-radius:5px;font-size:13px;outline:none;
-      position:relative; /* aşağı açılmasını destekler */
+    #bm_policy {max-height:120px;overflow-y:auto;scrollbar-width:thin;}
+    #bm_policy::-webkit-scrollbar {width:6px;}
+    #bm_policy::-webkit-scrollbar-thumb {background:${isDarkMode?"#555":"#ccc"};border-radius:4px;}
+    #bm_user_link,#bm_action,#bm_policy,#bm_market{
+      width:100%;padding:6px;margin:4px 0 8px 0;box-sizing:border-box;
+      border-radius:6px;font-size:12.5px;outline:none;
     }
-    select {
-      overflow-y:auto;
-      scrollbar-width:thin;
-      direction:ltr;
-      transform-origin:top center;
-    }
-    #bm_policy::-webkit-scrollbar-thumb {background:${isDarkMode ? "#555" : "#ccc"};border-radius:4px;}
     #bm_send,#bm_toggleTheme,#bm_syncToggle{
-      width:100%;padding:9px;margin-top:6px;
+      width:100%;padding:8px;margin-top:5px;
       border:none;border-radius:6px;
-      cursor:pointer;font-weight:bold;font-size:13px;
+      cursor:pointer;font-weight:600;font-size:12.5px;
       transition:background 0.2s ease;
     }
-    #bm_status{margin-top:5px;font-family:monospace;font-size:12px;white-space:pre-wrap;}
+    #bm_status{margin-top:4px;font-family:monospace;font-size:11px;white-space:pre-wrap;}
+    select,input,button{touch-action:manipulation;}
   `;
   document.head.appendChild(style);
 
@@ -150,11 +144,18 @@
   document.getElementById('bm_toggleTheme').addEventListener('click',()=>{isDarkMode=!isDarkMode;applyTheme();savePrefs();});
   document.getElementById('bm_syncToggle').addEventListener('click',()=>{
     autoSync=!autoSync;
-    document.getElementById('bm_syncToggle').textContent=`🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}`;
+    document.getElementById('bm_syncToggle').textContent=`🔁 Senkron: ${autoSync?"Açık":"Kapalı"}`;
     savePrefs();
   });
 
-  toggleBtn.addEventListener('click',()=>{panel.style.display=(panel.style.display==='none')?'block':'none';});
+  toggleBtn.addEventListener('click',()=>{
+    panel.style.display=(panel.style.display==='none')?'block':'none';
+  });
+
+  let dragging=false,offsetX=0,offsetY=0;
+  header.addEventListener('mousedown',e=>{dragging=true;offsetX=e.clientX-panel.offsetLeft;offsetY=e.clientY-panel.offsetTop;});
+  document.addEventListener('mousemove',e=>{if(dragging){panel.style.left=(e.clientX-offsetX)+'px';panel.style.top=(e.clientY-offsetY)+'px';}});
+  document.addEventListener('mouseup',()=>dragging=false);
 
   document.getElementById('bm_send').addEventListener('click',()=>{
     const user=document.getElementById('bm_user_link').value.trim();
@@ -163,7 +164,7 @@
     const params=`&bm_user=${encodeURIComponent(user)}&bm_action=${encodeURIComponent(document.getElementById('bm_action').value)}&bm_policy=${encodeURIComponent(document.getElementById('bm_policy').value)}&bm_market=${encodeURIComponent(document.getElementById('bm_market').value)}`;
     const w=window.open(base+params,'_blank');
     const status=document.getElementById('bm_status');
-    if(!w){status.textContent='❌ Pop-up engellendi — tarayıcı izin verin.';return;}
+    if(!w){status.textContent='❌ Pop-up engellendi — izin verin.';return;}
     document.getElementById('bm_user_link').value='';
     status.textContent=`✅ Gönderildi: ${user}`;
   });
