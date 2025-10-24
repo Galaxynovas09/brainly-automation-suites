@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Compact Modern UI + AutoUpdate + AutoDetect Profile)
 // @namespace    http://tampermonkey.net/
-// @version      4.5
+// @version      4.7
 // @description  Roma Formu Moderasyon Paneli 
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
@@ -67,9 +67,9 @@
     <input id="bm_user_link" type="text" placeholder="Kullanıcı linki (https://...)" />
     <label>Aksiyon</label>
     <select id="bm_action">
-      <option value="action_taken_moderators_24_hour_suspension">24 saat yasak</option>
-      <option value="action_taken_moderators_72_hour_suspension">72 saat yasak</option>
-      <option value="action_taken_moderators_banned_the_user" selected>Kalıcı yasak</option>
+      <option value="action_taken_moderators_24_hour_suspension">Kullanıcı 24 saat yasaklandı</option>
+      <option value="action_taken_moderators_72_hour_suspension">Kullanıcı 72 saat yasaklandı</option>
+      <option value="action_taken_moderators_banned_the_user" selected>Kalıcı yasaklandı</option>
     </select>
     <label>İhlal Türü</label>
     <select id="bm_policy">
@@ -88,7 +88,7 @@
       <option value="terorist_icerik">Terörist İçerik</option>
       <option value="siddet_tehdidi">Şiddet Tehdidi</option>
       <option value="yanlis_bilgi">Yanlış Bilgi</option>
-      <option value="phishing">Phishing</option>
+      <option value="phishing">E-dolandırıcılık</option>
       <option value="intihal">Kopya / Sınav</option>
       <option value="siddet_gorsel">Şiddet Görseli</option>
       <option value="tehlikeli">Tehlikeli İçerik</option>
@@ -177,7 +177,6 @@
     if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();}
   });
 
-  // 🔍 PROFİL LİNKİ OTOMATİK ALGILAMA
   function detectProfileLink() {
     const url = window.location.href;
     const input = document.getElementById('bm_user_link');
