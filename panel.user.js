@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Mobile + AutoDetect Duration + AutoUpdate + Manual Open)
+// @name         Brainly Moderation Panel PLUS5 (Mobile + AutoDetect Duration + Proxy Fix + AutoUpdate)
 // @namespace    http://tampermonkey.net/
-// @version      8.1
-// @description  Roma Formu Moderasyon Paneli
+// @version      8.2
+// @description  Roma Formu Moderasyon Paneli 
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
 // @downloadURL  https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
@@ -188,9 +188,8 @@
     const actionSelect = document.getElementById('bm_action');
     if (!input || !actionSelect) return;
 
-    if (url.includes("/profil/")) {
-      input.value = url.split("?")[0];
-    } else if (url.includes("/bans/ban/")) {
+    if (url.includes("/profil/")) input.value = url.split("?")[0];
+    else if (url.includes("/bans/ban/")) {
       const id = url.match(/ban\/(\d+)/)?.[1];
       if (id) input.value = `https://eodev.com/profil/USER-${id}`;
     }
@@ -199,71 +198,41 @@
     for (const li of listItems) {
       const text = li.textContent.trim();
       if (!text.startsWith("SORULAR:")) continue;
-
       const span = li.querySelector("span.orange");
       if (!span) continue;
-
       const value = span.textContent.trim();
-
-      if (value.includes("24 saatliğine askıya al")) {
-        actionSelect.value = "action_taken_moderators_24_hour_suspension";
-        break;
-      }
-      if (value.includes("72 saatliğine askıya al")) {
-        actionSelect.value = "action_taken_moderators_72_hour_suspension";
-        break;
-      }
-      if (value.includes("Yasakla")) {
-        actionSelect.value = "action_taken_moderators_banned_the_user";
-        break;
-      }
-    }
-  }
-
-  function detectDurationFromIframe(url) {
-    try {
-      const iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
-      iframe.src = url;
-      document.body.appendChild(iframe);
-
-      iframe.onload = () => {
-        try {
-          const doc = iframe.contentDocument || iframe.contentWindow.document;
-          const listItems = doc.querySelectorAll("li");
-          const actionSelect = document.getElementById('bm_action');
-          for (const li of listItems) {
-            const text = li.textContent.trim();
-            if (!text.startsWith("SORULAR:")) continue;
-            const span = li.querySelector("span.orange");
-            if (!span) continue;
-            const value = span.textContent.trim();
-            if (value.includes("24 saatliğine askıya al")) {
-              actionSelect.value = "action_taken_moderators_24_hour_suspension";
-              break;
-            }
-            if (value.includes("72 saatliğine askıya al")) {
-              actionSelect.value = "action_taken_moderators_72_hour_suspension";
-              break;
-            }
-            if (value.includes("Yasakla")) {
-              actionSelect.value = "action_taken_moderators_banned_the_user";
-              break;
-            }
-          }
-        } catch (err) {
-          console.error("İframe içi okuma hatası:", err);
-        }
-        iframe.remove();
-      };
-    } catch (e) {
-      console.error("İframe oluşturulamadı:", e);
+      if (value.includes("24 saatliğine askıya al")) actionSelect.value = "action_taken_moderators_24_hour_suspension";
+      else if (value.includes("72 saatliğine askıya al")) actionSelect.value = "action_taken_moderators_72_hour_suspension";
+      else if (value.includes("Yasakla")) actionSelect.value = "action_taken_moderators_banned_the_user";
     }
   }
   
+  async function detectDurationFromLink(url) {
+    try {
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+      const res = await fetch(proxyUrl);
+      if (!res.ok) return;
+      const html = await res.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const listItems = doc.querySelectorAll("li");
+      const actionSelect = document.getElementById('bm_action');
+      for (const li of listItems) {
+        const text = li.textContent.trim();
+        if (!text.startsWith("SORULAR:")) continue;
+        const span = li.querySelector("span.orange");
+        if (!span) continue;
+        const value = span.textContent.trim();
+        if (value.includes("24 saatliğine askıya al")) { actionSelect.value = "action_taken_moderators_24_hour_suspension"; return; }
+        if (value.includes("72 saatliğine askıya al")) { actionSelect.value = "action_taken_moderators_72_hour_suspension"; return; }
+        if (value.includes("Yasakla")) { actionSelect.value = "action_taken_moderators_banned_the_user"; return; }
+      }
+    } catch (e) { console.error("Proxy ile süre algılanamadı:", e); }
+  }
+
   document.getElementById('bm_user_link').addEventListener('change', e => {
     const url = e.target.value.trim();
-    if (url.startsWith("http")) detectDurationFromIframe(url);
+    if (url.startsWith("http")) detectDurationFromLink(url);
   });
 
   window.addEventListener('load', () => setTimeout(detectProfileLink, 1000));
