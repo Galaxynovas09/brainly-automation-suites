@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Stable + Mobile Fixed)
+// @name         Brainly Moderation Panel PLUS5 (Stable + Mobile Fixed Scrollable Policy)
 // @namespace    http://tampermonkey.net/
-// @version      2.7
-// @description  Roma formu moderasyon paneli (mobil uyumlu, sabit, taşınabilir, boyutlanabilir)
+// @version      3.5
+// @description  Roma formu moderasyon paneli mobil uyumlu 
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -102,6 +102,20 @@
 
   const style=document.createElement('style');
   style.textContent=`
+    /* 🔹 İhlal Türü menüsüne kaydırma eklendi */
+    #bm_policy {
+      max-height: 140px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+    #bm_policy::-webkit-scrollbar {
+      width: 6px;
+    }
+    #bm_policy::-webkit-scrollbar-thumb {
+      background: ${isDarkMode ? "#555" : "#ccc"};
+      border-radius: 4px;
+    }
+
     #bm_user_link,#bm_action,#bm_policy,#bm_market{
       width:100%;padding:8px;margin:6px 0 10px 0;box-sizing:border-box;
       border-radius:5px;font-size:13px;outline:none;
@@ -133,38 +147,23 @@
     });
   };
 
-  const savePrefs=()=>{
-    localStorage.setItem(PREF_KEY,JSON.stringify({isDarkMode,autoSync}));
-  };
+  const savePrefs=()=>{ localStorage.setItem(PREF_KEY,JSON.stringify({isDarkMode,autoSync})); };
 
-  document.getElementById('bm_toggleTheme').addEventListener('click',()=>{
-    isDarkMode=!isDarkMode;applyTheme();savePrefs();
-  });
+  document.getElementById('bm_toggleTheme').addEventListener('click',()=>{ isDarkMode=!isDarkMode;applyTheme();savePrefs(); });
   document.getElementById('bm_syncToggle').addEventListener('click',()=>{
     autoSync=!autoSync;
     document.getElementById('bm_syncToggle').textContent=`🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}`;
     savePrefs();
   });
 
-  const togglePanel=()=>{
-    panel.style.display = (panel.style.display==="none") ? "block" : "none";
-  };
+  const togglePanel=()=>{ panel.style.display = (panel.style.display==="none") ? "block" : "none"; };
   toggleBtn.addEventListener('click',togglePanel);
   toggleBtn.addEventListener('touchstart',togglePanel);
 
   let dragging=false,startX=0,startY=0,offsetX=0,offsetY=0;
-  const startDrag=(x,y)=>{
-    dragging=true;
-    offsetX=x-panel.getBoundingClientRect().left;
-    offsetY=y-panel.getBoundingClientRect().top;
-  };
-  const moveDrag=(x,y)=>{
-    if(!dragging)return;
-    panel.style.left=(x-offsetX)+'px';
-    panel.style.top=(y-offsetY)+'px';
-    panel.style.transform='none';
-  };
-  const endDrag=()=>{dragging=false;};
+  const startDrag=(x,y)=>{ dragging=true; offsetX=x-panel.getBoundingClientRect().left; offsetY=y-panel.getBoundingClientRect().top; };
+  const moveDrag=(x,y)=>{ if(!dragging)return; panel.style.left=(x-offsetX)+'px'; panel.style.top=(y-offsetY)+'px'; panel.style.transform='none'; };
+  const endDrag=()=>{ dragging=false; };
   header.addEventListener('mousedown',e=>startDrag(e.clientX,e.clientY));
   header.addEventListener('touchstart',e=>startDrag(e.touches[0].clientX,e.touches[0].clientY));
   document.addEventListener('mousemove',e=>moveDrag(e.clientX,e.clientY));
@@ -184,9 +183,7 @@
     status.textContent=`✅ Gönderildi: ${user}`;
   });
 
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
-    if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();}
-  });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{ if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();} });
 
   applyTheme();
 })();
