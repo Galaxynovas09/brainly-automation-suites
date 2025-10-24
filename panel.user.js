@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Compact Modern UI + AutoUpdate)
 // @namespace    http://tampermonkey.net/
-// @version      3.9
-// @description  Roma Formu Gönderim Paneli
+// @version      4.2
+// @description  Roma Formu Moderasyon Paneli
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
 // @downloadURL  https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
@@ -13,7 +13,6 @@
 (function(){
   'use strict';
 
-  const CURRENT_VERSION = "3.7";
   const PREF_KEY = "bm_panel_prefs_v8";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -108,6 +107,7 @@
   panel.appendChild(content);
   document.body.appendChild(panel);
 
+  // Stiller
   const style=document.createElement('style');
   style.textContent=`
     #bm_policy {max-height:120px;overflow-y:auto;scrollbar-width:thin;}
@@ -129,7 +129,7 @@
   document.head.appendChild(style);
 
   const applyTheme=()=>{
-    c=getTheme();
+    const cNew=getTheme(); c=cNew;
     panel.style.background=c.bg;panel.style.color=c.fg;panel.style.border=`1.5px solid ${c.border}`;
     header.style.background=c.header;
     document.querySelectorAll('#bm_user_link,#bm_action,#bm_policy,#bm_market').forEach(el=>{
@@ -177,23 +177,6 @@
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
     if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();}
   });
-
-  fetch('https://raw.githubusercontent.com/Galaxynovas09/brainly-automation-suites/refs/heads/main/panel.user.js')
-    .then(r=>r.text())
-    .then(text=>{
-      const match = text.match(/@version\s+([0-9.]+)/);
-      if(match && match[1] && match[1] !== CURRENT_VERSION){
-        const note=document.createElement('div');
-        Object.assign(note.style,{
-          position:'fixed',bottom:'15px',right:'15px',background:'#2196f3',
-          color:'#fff',padding:'10px 14px',borderRadius:'8px',zIndex:99999999,
-          fontSize:'13px',fontWeight:'600',fontFamily:'Inter, Arial'
-        });
-        note.textContent="🆕 Yeni sürüm mevcut! Yenile veya Tampermonkey güncellemeleri kontrol et.";
-        document.body.appendChild(note);
-        setTimeout(()=>note.remove(),10000);
-      }
-    }).catch(()=>{});
 
   applyTheme();
 })();
