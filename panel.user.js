@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Elegant UI + Mobile Right Fixed)
+// @name         Brainly Moderation Panel PLUS5 (Elegant UI + Mobile Right Fixed Scrollable Policy)
 // @namespace    http://tampermonkey.net/
-// @version      3.2
+// @version      3.3
 // @description  Roma formu moderasyon paneli 
 // @match        *://*/*
 // @grant        none
@@ -108,6 +108,20 @@
 
   const style=document.createElement('style');
   style.textContent=`
+    /* 🔹 İhlal Türü menüsüne kaydırma ekle */
+    #bm_policy {
+      max-height: 140px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+    #bm_policy::-webkit-scrollbar {
+      width: 6px;
+    }
+    #bm_policy::-webkit-scrollbar-thumb {
+      background: ${isDarkMode ? "#555" : "#ccc"};
+      border-radius: 4px;
+    }
+
     #bm_user_link,#bm_action,#bm_policy,#bm_market{
       width:100%;padding:9px 10px;margin:6px 0 12px 0;box-sizing:border-box;
       border-radius:8px;font-size:13px;outline:none;
