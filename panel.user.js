@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Compact Modern UI + AutoUpdate)
+// @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Compact Modern UI + AutoUpdate + AutoDetect Profile)
 // @namespace    http://tampermonkey.net/
-// @version      4.2
-// @description  Roma Formu Moderasyon Paneli
+// @version      4.5
+// @description  Roma Formu Moderasyon Paneli 
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
 // @downloadURL  https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
@@ -107,7 +107,6 @@
   panel.appendChild(content);
   document.body.appendChild(panel);
 
-  // Stiller
   const style=document.createElement('style');
   style.textContent=`
     #bm_policy {max-height:120px;overflow-y:auto;scrollbar-width:thin;}
@@ -177,6 +176,30 @@
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
     if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();}
   });
+
+  // 🔍 PROFİL LİNKİ OTOMATİK ALGILAMA
+  function detectProfileLink() {
+    const url = window.location.href;
+    const input = document.getElementById('bm_user_link');
+    if (!input) return;
+
+    if (url.includes("/profil/")) {
+      input.value = url.split("?")[0];
+    } else if (url.includes("/bans/ban/")) {
+      const id = url.match(/ban\/(\d+)/)?.[1];
+      if (id) input.value = `https://eodev.com/profil/USER-${id}`;
+    }
+  }
+
+  window.addEventListener('load',()=>setTimeout(detectProfileLink,1000));
+
+  let lastUrl = location.href;
+  new MutationObserver(()=>{
+    if(location.href !== lastUrl){
+      lastUrl = location.href;
+      detectProfileLink();
+    }
+  }).observe(document,{subtree:true,childList:true});
 
   applyTheme();
 })();
