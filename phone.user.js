@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Mobile Optimized + Kiwi Compatible + AutoUpdate + AutoDetect Profile + AutoBanDetect)
+// @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Compact Modern UI + AutoUpdate + AutoDetect Profile + AutoBanDetect + Mobile Support)
 // @namespace    http://tampermonkey.net/
-// @version      9.2
-// @description  Roma Formu Moderasyon Paneli Mobil Uyumlu
+// @version      9.3
+// @description  Roma Formu Moderasyon Paneli Mobil Uyumlu 
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
 // @downloadURL  https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
@@ -12,6 +12,14 @@
 
 (function () {
   'use strict';
+
+  // Mobil uyumluluk için viewport
+  if (!document.querySelector('meta[name="viewport"]')) {
+    const meta = document.createElement('meta');
+    meta.name = 'viewport';
+    meta.content = 'width=device-width, initial-scale=1.0, user-scalable=no';
+    document.head.appendChild(meta);
+  }
 
   const PREF_KEY = "bm_panel_prefs_v8";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
@@ -27,39 +35,44 @@
   };
   let c = getTheme();
 
-  const savePrefs = () => localStorage.setItem(PREF_KEY, JSON.stringify({ isDarkMode, autoSync }));
+  const savePrefs = () => {
+    localStorage.setItem(PREF_KEY, JSON.stringify({ isDarkMode, autoSync }));
+  };
 
   const toggleBtn = document.createElement('button');
   Object.assign(toggleBtn.style, {
-    position: 'fixed', bottom: '15px', right: '15px', padding: '8px 12px',
-    backgroundColor: c.accent, color: '#fff', border: 'none', borderRadius: '50px',
-    cursor: 'pointer', zIndex: 9999999, fontWeight: '600', fontSize: '13px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.3)', touchAction: 'manipulation'
+    position: 'fixed', top: '10px', right: '10px', padding: '5px 8px',
+    backgroundColor: c.accent, color: '#fff', border: 'none', borderRadius: '6px',
+    cursor: 'pointer', zIndex: 9999999, fontWeight: '600', fontSize: '12px',
+    touchAction: 'manipulation'
   });
-  toggleBtn.textContent = "🧩 Panel";
+  toggleBtn.textContent = "📝 Brainly";
   document.body.appendChild(toggleBtn);
 
   const panel = document.createElement('div');
   Object.assign(panel.style, {
-    position: 'fixed', bottom: '65px', right: '10px',
-    width: '90vw', maxWidth: '320px', height: '70vh', maxHeight: '480px',
+    position: 'fixed', top: '60px', right: '12px',
+    width: '260px', height: '380px',
     background: c.bg, color: c.fg, border: `1.5px solid ${c.border}`,
-    zIndex: 9999998, fontFamily: 'Inter, Arial, sans-serif', fontSize: '13px',
-    borderRadius: '12px', overflowY: 'auto', boxSizing: 'border-box', paddingBottom: '10px',
-    boxShadow: '0 3px 10px rgba(0,0,0,0.3)', display: 'none'
+    zIndex: 9999998, fontFamily: 'Inter, Arial, sans-serif', fontSize: '12.5px',
+    borderRadius: '10px', overflowY: 'auto', resize: 'both',
+    boxSizing: 'border-box', paddingBottom: '10px',
+    boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
+    display: 'none',
+    touchAction: 'none'
   });
 
   const header = document.createElement('div');
   header.textContent = "Brainly Moderation Panel";
   Object.assign(header.style, {
-    background: c.header, color: '#fff', padding: '10px', cursor: 'grab',
-    fontWeight: '600', borderTopLeftRadius: '12px', borderTopRightRadius: '12px',
-    textAlign: 'center', fontSize: '13px', userSelect: 'none', touchAction: 'none'
+    background: c.header, color: '#fff', padding: '7px', cursor: 'move',
+    fontWeight: '600', borderTopLeftRadius: '10px', borderTopRightRadius: '10px',
+    textAlign: 'center', fontSize: '12.5px', userSelect: 'none', touchAction: 'none'
   });
   panel.appendChild(header);
 
   const content = document.createElement('div');
-  content.style.padding = "10px";
+  content.style.padding = "8px";
   content.innerHTML = `
     <input id="bm_user_link" type="text" placeholder="Kullanıcı linki (https://...)" />
     <label>Aksiyon</label>
@@ -110,17 +123,18 @@
     #bm_policy::-webkit-scrollbar {width:6px;}
     #bm_policy::-webkit-scrollbar-thumb {background:${isDarkMode ? "#555" : "#ccc"};border-radius:4px;}
     #bm_user_link,#bm_action,#bm_policy,#bm_market{
-      width:100%;padding:8px;margin:6px 0;box-sizing:border-box;
-      border-radius:6px;font-size:13px;outline:none;
+      width:100%;padding:6px;margin:4px 0 8px 0;box-sizing:border-box;
+      border-radius:6px;font-size:12.5px;outline:none;
+      touch-action:manipulation;
     }
     #bm_send,#bm_toggleTheme,#bm_syncToggle{
-      width:100%;padding:10px;margin-top:6px;
+      width:100%;padding:8px;margin-top:5px;
       border:none;border-radius:6px;
-      cursor:pointer;font-weight:600;font-size:13px;
-      transition:background 0.2s ease;touch-action:manipulation;
+      cursor:pointer;font-weight:600;font-size:12.5px;
+      transition:background 0.2s ease;
+      touch-action:manipulation;
     }
-    #bm_status{margin-top:5px;font-family:monospace;font-size:12px;white-space:pre-wrap;}
-    select,input,button{touch-action:manipulation;}
+    #bm_status{margin-top:4px;font-family:monospace;font-size:11px;white-space:pre-wrap;}
   `;
   document.head.appendChild(style);
 
@@ -160,6 +174,7 @@
     panel.style.display = (panel.style.display === 'none') ? 'block' : 'none';
   });
 
+  // Dokunmatik sürükleme desteği (mobil için)
   let touchStart = null;
   header.addEventListener('touchstart', e => {
     const t = e.touches[0];
@@ -229,7 +244,7 @@
     }
   }
 
-  window.addEventListener('load', () => setTimeout(detectProfileLink, 1200));
+  window.addEventListener('load', () => setTimeout(detectProfileLink, 1000));
 
   let lastUrl = location.href;
   new MutationObserver(() => {
