@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Compact Modern UI + AutoUpdate + AutoDetect Profile + AutoBanDetect)
 // @namespace    http://tampermonkey.net/
-// @version      5.7
+// @version      5.9
 // @description  Roma Formu Moderasyon Paneli 
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
@@ -190,18 +190,25 @@
       if (id) input.value = `https://eodev.com/profil/USER-${id}`;
     }
 
-const listItems = document.querySelectorAll("li span.orange");
-for (const span of listItems) {
-  const text = span.textContent.trim();
-  if (text.includes("24 saatliğine askıya al")) {
+const listItems = document.querySelectorAll("li");
+for (const li of listItems) {
+  const text = li.textContent.trim();
+  if (!text.startsWith("SORULAR:")) continue; 
+
+  const span = li.querySelector("span.orange");
+  if (!span) continue;
+
+  const value = span.textContent.trim();
+
+  if (value.includes("24 saatliğine askıya al")) {
     actionSelect.value = "action_taken_moderators_24_hour_suspension";
     break;
   }
-  if (text.includes("72 saatliğine askıya al")) {
+  if (value.includes("72 saatliğine askıya al")) {
     actionSelect.value = "action_taken_moderators_72_hour_suspension";
     break;
   }
-  if (text.includes("Yasakla")) {
+  if (value.includes("Yasakla")) {
     actionSelect.value = "action_taken_moderators_banned_the_user";
     break;
   }
