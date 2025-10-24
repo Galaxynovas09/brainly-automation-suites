@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Brainly Moderation Panel PLUS5 (Stable + Mobile Right Fixed)
 // @namespace    http://tampermonkey.net/
-// @version      2.3
+// @version      2.7
 // @description  Roma formu moderasyon paneli 
 // @match        *://*/*
 // @grant        none
