@@ -2,7 +2,7 @@
 // @name         Brainly Moderation Panel PLUS5 (Mobile Compatible + AutoDetect Link Duration + AutoUpdate + Manual Open)
 // @namespace    http://tampermonkey.net/
 // @version      7.3
-// @description  Roma Formu Moderasyon Paneli (mobil + otomatik süre tespiti)
+// @description  Roma Formu Moderasyon Paneli 
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
 // @downloadURL  https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
