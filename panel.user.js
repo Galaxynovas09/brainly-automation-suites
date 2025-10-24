@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Compact Modern UI + AutoUpdate + AutoDetect Profile + AutoBanDetect)
+// @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Compact Modern UI + AutoUpdate + AutoDetect Profile + AutoBanDetect DOM)
 // @namespace    http://tampermonkey.net/
-// @version      5.2
+// @version      5.5
 // @description  Roma Formu Moderasyon Paneli 
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
@@ -190,17 +190,25 @@
       if (id) input.value = `https://eodev.com/profil/USER-${id}`;
     }
 
-    const html = document.body.innerHTML.toLowerCase();
-    if (html.includes("24 saatliğine askıya al")) {
-      actionSelect.value = "action_taken_moderators_24_hour_suspension";
-    } else if (html.includes("72 saatliğine askıya al")) {
-      actionSelect.value = "action_taken_moderators_72_hour_suspension";
-    } else if (html.includes(">yasakla<")) {
-      actionSelect.value = "action_taken_moderators_banned_the_user";
+    const listItems = document.querySelectorAll('li');
+    for (const li of listItems) {
+      const text = li.textContent.trim();
+      if (text.includes("24 saatliğine askıya al")) {
+        actionSelect.value = "action_taken_moderators_24_hour_suspension";
+        break;
+      }
+      if (text.includes("72 saatliğine askıya al")) {
+        actionSelect.value = "action_taken_moderators_72_hour_suspension";
+        break;
+      }
+      if (text.includes("Yasakla")) {
+        actionSelect.value = "action_taken_moderators_banned_the_user";
+        break;
+      }
     }
   }
 
-  window.addEventListener('load',()=>setTimeout(detectProfileLink,1000));
+  window.addEventListener('load',()=>setTimeout(detectProfileLink,1200));
 
   let lastUrl = location.href;
   new MutationObserver(()=>{
