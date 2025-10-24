@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Auto Update + Mobile Fixed Scrollable Policy)
+// @name         Brainly Moderation Panel PLUS5 (Right Fixed + Compact + Auto Update)
 // @namespace    http://tampermonkey.net/
-// @version      3.9
+// @version      4.0
 // @description  Roma Formu Moderasyon Paneli 
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
@@ -40,38 +40,40 @@
   toggleBtn.textContent="📝 Brainly";
   document.body.appendChild(toggleBtn);
 
+  // 🧩 Panel (sağ sabit)
   const panel=document.createElement('div');
   Object.assign(panel.style,{
-    position:'fixed',top:'60px',left:'50%',transform:'translateX(-50%)',
-    width:'min(95vw, 320px)',height:'min(85vh, 460px)',
+    position:'fixed',top:'70px',right:'5px',
+    width:'260px',height:'400px', // 👈 daha küçük ve sabit boyut
     background:c.bg,color:c.fg,border:`1.5px solid ${c.border}`,
     zIndex:9999998,fontFamily:'Arial,sans-serif',fontSize:'13px',
-    borderRadius:'10px',overflowY:'auto',resize:'both',
+    borderRadius:'10px',overflowY:'auto',
     boxSizing:'border-box',paddingBottom:'10px',
     boxShadow:'0 3px 12px rgba(0,0,0,0.25)',
-    display:'none' 
+    display:'none'
   });
 
   const header=document.createElement('div');
   header.textContent="Brainly Moderation Panel";
   Object.assign(header.style,{
-    background:c.header,color:'#fff',padding:'8px',cursor:'move',
-    fontWeight:'600',borderTopLeftRadius:'10px',borderTopRightRadius:'10px',
-    textAlign:'center',fontSize:'13px',userSelect:'none'
+    background:c.header,color:'#fff',padding:'6px',
+    fontWeight:'600',textAlign:'center',fontSize:'13px',
+    borderTopLeftRadius:'10px',borderTopRightRadius:'10px',
+    userSelect:'none'
   });
   panel.appendChild(header);
 
   const content=document.createElement('div');
-  content.style.padding="10px";
+  content.style.padding="8px";
   content.innerHTML=`
     <input id="bm_user_link" type="text" placeholder="Kullanıcı profil linki (https://...)" />
     <label>Aksiyon</label>
     <select id="bm_action">
      <option value="action_taken_moderators_24_hour_suspension">Kullanıcı 24 saat yasaklandı</option>
      <option value="action_taken_moderators_72_hour_suspension">Kullanıcı 72 saat yasaklandı</option>
-      <option value="action_taken_moderators_banned_the_user" selected>Kullanıcı yasaklandı</option>
+     <option value="action_taken_moderators_banned_the_user" selected>Kullanıcı yasaklandı</option>
     </select>
-       <label>İhlal Türü</label>
+    <label>İhlal Türü</label>
     <select id="bm_policy">
       <option value="benzerlik_spami" selected>Benzerlik Spamı</option>
       <option value="spam">Meet Spam</option>
@@ -110,21 +112,26 @@
   // 🎨 Stil
   const style=document.createElement('style');
   style.textContent=`
-    #bm_policy {max-height: 140px;overflow-y: auto;scrollbar-width: thin;}
-    #bm_policy::-webkit-scrollbar {width: 6px;}
-    #bm_policy::-webkit-scrollbar-thumb {background: ${isDarkMode ? "#555" : "#ccc"};border-radius: 4px;}
-    #bm_user_link,#bm_action,#bm_policy,#bm_market{
-      width:100%;padding:8px;margin:6px 0 10px 0;box-sizing:border-box;
-      border-radius:5px;font-size:13px;outline:none;
+    select {
+      max-height: 130px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      direction: ltr;
     }
-    #bm_send,#bm_toggleTheme,#bm_syncToggle{
-      width:100%;padding:9px;margin-top:6px;
+    select::-webkit-scrollbar {width: 6px;}
+    select::-webkit-scrollbar-thumb {background: ${isDarkMode ? "#555" : "#ccc"};border-radius: 4px;}
+    select, input {
+      width:100%;padding:6px;margin:4px 0 8px 0;box-sizing:border-box;
+      border-radius:5px;font-size:12px;outline:none;
+      appearance:auto !important; /* 👈 Menülerin yukarı değil aşağı açılmasını zorla */
+    }
+    button {
+      width:100%;padding:7px;margin-top:5px;
       border:none;border-radius:6px;
-      cursor:pointer;font-weight:bold;font-size:13px;
+      cursor:pointer;font-weight:bold;font-size:12px;
       transition:background 0.2s ease;
     }
-    #bm_status{margin-top:5px;font-family:monospace;font-size:12px;white-space:pre-wrap;}
-    select, input, button { touch-action: manipulation; }
+    #bm_status{margin-top:5px;font-family:monospace;font-size:11px;white-space:pre-wrap;}
   `;
   document.head.appendChild(style);
 
@@ -132,16 +139,14 @@
     c=getTheme();
     panel.style.background=c.bg;panel.style.color=c.fg;panel.style.border=`1.5px solid ${c.border}`;
     header.style.background=c.header;
-    document.querySelectorAll('#bm_user_link,#bm_action,#bm_policy,#bm_market').forEach(el=>{
+    document.querySelectorAll('input, select').forEach(el=>{
       el.style.background=c.inputBg;el.style.border=`1px solid ${c.inputBorder}`;el.style.color=c.fg;
     });
-    const send=document.getElementById('bm_send');
-    const theme=document.getElementById('bm_toggleTheme');
-    const sync=document.getElementById('bm_syncToggle');
-    send.style.background=c.accent;send.style.color='#fff';
-    [theme,sync].forEach(b=>{
+    document.querySelectorAll('button').forEach(b=>{
       b.style.background=c.btnBg;b.style.border=`1px solid ${c.btnBorder}`;b.style.color=c.fg;
     });
+    document.getElementById('bm_send').style.background=c.accent;
+    document.getElementById('bm_send').style.color='#fff';
   };
 
   document.getElementById('bm_toggleTheme').addEventListener('click',()=>{ isDarkMode=!isDarkMode;applyTheme();savePrefs(); });
@@ -151,22 +156,8 @@
     savePrefs();
   });
 
-  toggleBtn.addEventListener('click',()=>{
-    panel.style.display = (panel.style.display === 'none') ? 'block' : 'none';
-  });
+  toggleBtn.addEventListener('click',()=>{panel.style.display=(panel.style.display==='none')?'block':'none';});
 
-  let dragging=false,startX=0,startY=0,offsetX=0,offsetY=0;
-  const startDrag=(x,y)=>{ dragging=true; offsetX=x-panel.getBoundingClientRect().left; offsetY=y-panel.getBoundingClientRect().top; };
-  const moveDrag=(x,y)=>{ if(!dragging)return; panel.style.left=(x-offsetX)+'px'; panel.style.top=(y-offsetY)+'px'; panel.style.transform='none'; };
-  const endDrag=()=>{ dragging=false; };
-  header.addEventListener('mousedown',e=>startDrag(e.clientX,e.clientY));
-  header.addEventListener('touchstart',e=>startDrag(e.touches[0].clientX,e.touches[0].clientY));
-  document.addEventListener('mousemove',e=>moveDrag(e.clientX,e.clientY));
-  document.addEventListener('touchmove',e=>moveDrag(e.touches[0].clientX,e.touches[0].clientY));
-  document.addEventListener('mouseup',endDrag);
-  document.addEventListener('touchend',endDrag);
-
-  // 🚀 Gönder butonu
   document.getElementById('bm_send').addEventListener('click',()=>{
     const user=document.getElementById('bm_user_link').value.trim();
     if(!user){alert('Kullanıcı linkini gir.');return;}
