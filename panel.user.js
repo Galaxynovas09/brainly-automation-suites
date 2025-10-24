@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (AutoDetect Profile + Ban Duration + AutoUpdate)
+// @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Compact Modern UI + AutoUpdate + AutoDetect Profile + AutoBanDetect)
 // @namespace    http://tampermonkey.net/
-// @version      4.9
+// @version      5.2
 // @description  Roma Formu Moderasyon Paneli 
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
@@ -180,7 +180,8 @@
   function detectProfileLink() {
     const url = window.location.href;
     const input = document.getElementById('bm_user_link');
-    if (!input) return;
+    const actionSelect = document.getElementById('bm_action');
+    if (!input || !actionSelect) return;
 
     if (url.includes("/profil/")) {
       input.value = url.split("?")[0];
@@ -188,38 +189,24 @@
       const id = url.match(/ban\/(\d+)/)?.[1];
       if (id) input.value = `https://eodev.com/profil/USER-${id}`;
     }
-  }
 
-  function detectBanDuration() {
     const html = document.body.innerHTML.toLowerCase();
-    let duration = null;
-
     if (html.includes("24 saatliğine askıya al")) {
-      duration = "action_taken_moderators_24_hour_suspension";
+      actionSelect.value = "action_taken_moderators_24_hour_suspension";
     } else if (html.includes("72 saatliğine askıya al")) {
-      duration = "action_taken_moderators_72_hour_suspension";
+      actionSelect.value = "action_taken_moderators_72_hour_suspension";
     } else if (html.includes(">yasakla<")) {
-      duration = "action_taken_moderators_banned_the_user";
-    }
-
-    if (duration) {
-      const actionSelect = document.getElementById("bm_action");
-      if (actionSelect) {
-        actionSelect.value = duration;
-        const status = document.getElementById("bm_status");
-        if (status) status.textContent = `⚙️ Tespit edildi: ${actionSelect.options[actionSelect.selectedIndex].text}`;
-      }
+      actionSelect.value = "action_taken_moderators_banned_the_user";
     }
   }
 
-  window.addEventListener('load',()=>setTimeout(()=>{detectProfileLink();detectBanDuration();},1000));
+  window.addEventListener('load',()=>setTimeout(detectProfileLink,1000));
 
   let lastUrl = location.href;
   new MutationObserver(()=>{
     if(location.href !== lastUrl){
       lastUrl = location.href;
       detectProfileLink();
-      detectBanDuration();
     }
   }).observe(document,{subtree:true,childList:true});
 
