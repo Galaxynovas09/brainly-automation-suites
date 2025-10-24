@@ -1,9 +1,11 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Stable + Mobile Fixed Scrollable Policy)
+// @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Auto Update + Mobile Fixed Scrollable Policy)
 // @namespace    http://tampermonkey.net/
-// @version      3.7
-// @description  Roma formu moderasyon paneli mobil uyumlu 
+// @version      3.9
+// @description  Roma Formu Moderasyon Paneli 
 // @match        *://*/*
+// @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
+// @downloadURL  https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
@@ -25,6 +27,10 @@
   };
   let c = getTheme();
 
+  const savePrefs = () => {
+    localStorage.setItem(PREF_KEY, JSON.stringify({isDarkMode, autoSync}));
+  };
+
   const toggleBtn=document.createElement('button');
   Object.assign(toggleBtn.style,{
     position:'fixed',top:'12px',right:'12px',padding:'6px 10px',
@@ -42,7 +48,8 @@
     zIndex:9999998,fontFamily:'Arial,sans-serif',fontSize:'13px',
     borderRadius:'10px',overflowY:'auto',resize:'both',
     boxSizing:'border-box',paddingBottom:'10px',
-    boxShadow:'0 3px 12px rgba(0,0,0,0.25)',display:'block'
+    boxShadow:'0 3px 12px rgba(0,0,0,0.25)',
+    display:'none' 
   });
 
   const header=document.createElement('div');
@@ -100,22 +107,12 @@
   panel.appendChild(content);
   document.body.appendChild(panel);
 
+  // 🎨 Stil
   const style=document.createElement('style');
   style.textContent=`
-    /* 🔹 İhlal Türü menüsüne kaydırma eklendi */
-    #bm_policy {
-      max-height: 140px;
-      overflow-y: auto;
-      scrollbar-width: thin;
-    }
-    #bm_policy::-webkit-scrollbar {
-      width: 6px;
-    }
-    #bm_policy::-webkit-scrollbar-thumb {
-      background: ${isDarkMode ? "#555" : "#ccc"};
-      border-radius: 4px;
-    }
-
+    #bm_policy {max-height: 140px;overflow-y: auto;scrollbar-width: thin;}
+    #bm_policy::-webkit-scrollbar {width: 6px;}
+    #bm_policy::-webkit-scrollbar-thumb {background: ${isDarkMode ? "#555" : "#ccc"};border-radius: 4px;}
     #bm_user_link,#bm_action,#bm_policy,#bm_market{
       width:100%;padding:8px;margin:6px 0 10px 0;box-sizing:border-box;
       border-radius:5px;font-size:13px;outline:none;
@@ -147,8 +144,6 @@
     });
   };
 
-  const savePrefs=()=>{ localStorage.setItem(PREF_KEY,JSON.stringify({isDarkMode,autoSync})); };
-
   document.getElementById('bm_toggleTheme').addEventListener('click',()=>{ isDarkMode=!isDarkMode;applyTheme();savePrefs(); });
   document.getElementById('bm_syncToggle').addEventListener('click',()=>{
     autoSync=!autoSync;
@@ -156,9 +151,9 @@
     savePrefs();
   });
 
-  const togglePanel=()=>{ panel.style.display = (panel.style.display==="none") ? "block" : "none"; };
-  toggleBtn.addEventListener('click',togglePanel);
-  toggleBtn.addEventListener('touchstart',togglePanel);
+  toggleBtn.addEventListener('click',()=>{
+    panel.style.display = (panel.style.display === 'none') ? 'block' : 'none';
+  });
 
   let dragging=false,startX=0,startY=0,offsetX=0,offsetY=0;
   const startDrag=(x,y)=>{ dragging=true; offsetX=x-panel.getBoundingClientRect().left; offsetY=y-panel.getBoundingClientRect().top; };
@@ -171,6 +166,7 @@
   document.addEventListener('mouseup',endDrag);
   document.addEventListener('touchend',endDrag);
 
+  // 🚀 Gönder butonu
   document.getElementById('bm_send').addEventListener('click',()=>{
     const user=document.getElementById('bm_user_link').value.trim();
     if(!user){alert('Kullanıcı linkini gir.');return;}
@@ -183,7 +179,9 @@
     status.textContent=`✅ Gönderildi: ${user}`;
   });
 
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{ if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();} });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
+    if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();}
+  });
 
   applyTheme();
 })();
