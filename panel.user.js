@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Elegant Compact Modern UI)
+// @name         Brainly Moderation Panel PLUS5 (Stable + Mobile Fixed Scrollable Policy)
 // @namespace    http://tampermonkey.net/
-// @version      3.5
-// @description  Roma formu moderasyon paneli 
+// @version      3.7
+// @description  Roma formu moderasyon paneli mobil uyumlu 
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -11,38 +11,38 @@
 (function(){
   'use strict';
 
-  const PREF_KEY = "bm_panel_prefs_v10";
+  const PREF_KEY = "bm_panel_prefs_v8";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
   let autoSync = saved.autoSync ?? true;
 
   const getTheme = () => isDarkMode ? {
-    bg:'#1c1c1e', fg:'#f1f1f1', border:'#3f51b5', accent:'#2979ff', header:'#2c387e',
-    inputBg:'#2a2a2d', inputBorder:'#444', btnBg:'#333', btnBorder:'#555'
+    bg:'#181818', fg:'#f1f1f1', border:'#3f51b5', accent:'#2196f3', header:'#1976d2',
+    inputBg:'#202020', inputBorder:'#333', btnBg:'#2a2a2a', btnBorder:'#555'
   } : {
-    bg:'#ffffff', fg:'#1a1a1a', border:'#1976d2', accent:'#1976d2', header:'#1976d2',
-    inputBg:'#fafafa', inputBorder:'#ccc', btnBg:'#f3f4f6', btnBorder:'#ddd'
+    bg:'#ffffff', fg:'#111', border:'#1976d2', accent:'#1976d2', header:'#1976d2',
+    inputBg:'#fff', inputBorder:'#ccc', btnBg:'#f5f5f5', btnBorder:'#bbb'
   };
   let c = getTheme();
 
   const toggleBtn=document.createElement('button');
   Object.assign(toggleBtn.style,{
-    position:'fixed',top:'10px',right:'10px',padding:'5px 10px',
+    position:'fixed',top:'12px',right:'12px',padding:'6px 10px',
     backgroundColor:c.accent,color:'#fff',border:'none',borderRadius:'6px',
-    cursor:'pointer',zIndex:9999999,fontWeight:'600',fontSize:'12px',
-    boxShadow:'0 2px 8px rgba(0,0,0,0.25)',transition:'all 0.2s ease'
+    cursor:'pointer',zIndex:9999999,fontWeight:'bold',fontSize:'13px'
   });
-  toggleBtn.textContent="🧩 Panel";
+  toggleBtn.textContent="📝 Brainly";
   document.body.appendChild(toggleBtn);
 
   const panel=document.createElement('div');
   Object.assign(panel.style,{
-    position:'fixed',top:'60px',right:'10px',width:'230px',
-    height:'min(80vh, 400px)',background:c.bg,color:c.fg,
-    border:`1px solid ${c.border}`,borderRadius:'10px',
-    zIndex:9999998,overflowY:'auto',boxSizing:'border-box',
-    boxShadow:'0 4px 16px rgba(0,0,0,0.25)',display:'block',
-    fontFamily:'Inter, Segoe UI, sans-serif',transition:'all 0.2s ease-in-out'
+    position:'fixed',top:'60px',left:'50%',transform:'translateX(-50%)',
+    width:'min(95vw, 320px)',height:'min(85vh, 460px)',
+    background:c.bg,color:c.fg,border:`1.5px solid ${c.border}`,
+    zIndex:9999998,fontFamily:'Arial,sans-serif',fontSize:'13px',
+    borderRadius:'10px',overflowY:'auto',resize:'both',
+    boxSizing:'border-box',paddingBottom:'10px',
+    boxShadow:'0 3px 12px rgba(0,0,0,0.25)',display:'block'
   });
 
   const header=document.createElement('div');
@@ -50,153 +50,130 @@
   Object.assign(header.style,{
     background:c.header,color:'#fff',padding:'8px',cursor:'move',
     fontWeight:'600',borderTopLeftRadius:'10px',borderTopRightRadius:'10px',
-    textAlign:'center',fontSize:'12px',userSelect:'none',letterSpacing:'0.4px'
+    textAlign:'center',fontSize:'13px',userSelect:'none'
   });
   panel.appendChild(header);
 
   const content=document.createElement('div');
-  content.style.padding="8px 10px";
+  content.style.padding="10px";
   content.innerHTML=`
-    <label>Kullanıcı Profili</label>
-    <input id="bm_user_link" type="text" placeholder="https://eodev.com/profil/..." />
-
+    <input id="bm_user_link" type="text" placeholder="Kullanıcı profil linki (https://...)" />
     <label>Aksiyon</label>
     <select id="bm_action">
-      <option value="action_taken_moderators_24_hour_suspension">24 Saat</option>
-      <option value="action_taken_moderators_72_hour_suspension">72 Saat</option>
-      <option value="action_taken_moderators_banned_the_user" selected>Kalıcı Yasak</option>
+     <option value="action_taken_moderators_24_hour_suspension">Kullanıcı 24 saat yasaklandı</option>
+     <option value="action_taken_moderators_72_hour_suspension">Kullanıcı 72 saat yasaklandı</option>
+      <option value="action_taken_moderators_banned_the_user" selected>Kullanıcı yasaklandı</option>
     </select>
-
-    <label>İhlal Türü</label>
+       <label>İhlal Türü</label>
     <select id="bm_policy">
-      <option selected>Benzerlik Spamı</option>
-      <option>Spam</option>
-      <option>Ticari Spam</option>
-      <option>Küfür</option>
-      <option>Zorbalık</option>
-      <option>Pornografi</option>
-      <option>Diğer</option>
+      <option value="benzerlik_spami" selected>Benzerlik Spamı</option>
+      <option value="spam">Meet Spam</option>
+      <option value="ticari_spam">Ticari Spam</option>
+      <option value="kufur">Küfür</option>
+      <option value="zorbalik">Zorbalık / Taciz</option>
+      <option value="pornografi">Pornografi</option>
+      <option value="mustehcenlik">Müstehcenlik</option>
+      <option value="nefret_soylemi">Nefret Söylemi</option>
+      <option value="kisisel_bilgi">Kişisel Bilgi Paylaşımı</option>
+      <option value="sahte_kimlik">Kimlik Sahtekarlığı</option>
+      <option value="cocuk_istismari">Çocuk İstismarı</option>
+      <option value="kendine_zarar">Kendine Zarar / İntihar</option>
+      <option value="terorist_icerik">Terörist İçerik</option>
+      <option value="siddet_tehdidi">Şiddet Tehdidi</option>
+      <option value="yanlis_bilgi">Yanlış Bilgi</option>
+      <option value="phishing">Phishing / Zararlı Yazılım</option>
+      <option value="intihal">Kopya / Sınav İhlali</option>
+      <option value="siddet_gorsel">Şiddet İçeren Görseller</option>
+      <option value="tehlikeli">Tehlikeli / Yasaklı İçerik</option>
+      <option value="other">Diğer</option>
     </select>
-
     <label>Market</label>
     <select id="bm_market">
-      <option selected>Türkiye</option>
+      <option value="turkey_clone" selected>Türkiye</option>
     </select>
-
-    <button id="bm_send">🚀 Gönder</button>
+    <button id="bm_send">Gönder</button>
     <div id="bm_status"></div>
     <hr>
-    <div class="bm-row">
-      <button id="bm_toggleTheme">🌓</button>
-      <button id="bm_syncToggle">${autoSync ? "🔁" : "⛔"}</button>
-    </div>
+    <button id="bm_toggleTheme">🌓 Tema Değiştir</button>
+    <button id="bm_syncToggle">🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}</button>
   `;
   panel.appendChild(content);
   document.body.appendChild(panel);
 
   const style=document.createElement('style');
   style.textContent=`
-    #bm_panel_root * { all: unset; display: revert; box-sizing: border-box !important; }
-
-    label {
-      font-size: 12px !important;
-      font-weight: 500 !important;
-      margin-top: 4px !important;
-      display: block !important;
-      color: ${c.fg} !important;
+    /* 🔹 İhlal Türü menüsüne kaydırma eklendi */
+    #bm_policy {
+      max-height: 140px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+    #bm_policy::-webkit-scrollbar {
+      width: 6px;
+    }
+    #bm_policy::-webkit-scrollbar-thumb {
+      background: ${isDarkMode ? "#555" : "#ccc"};
+      border-radius: 4px;
     }
 
-    input, select {
-      width: 100% !important;
-      padding: 6px 8px !important;
-      font-size: 12px !important;
-      margin: 4px 0 8px 0 !important;
-      border-radius: 6px !important;
-      border: 1px solid ${c.inputBorder} !important;
-      background: ${c.inputBg} !important;
-      color: ${c.fg} !important;
+    #bm_user_link,#bm_action,#bm_policy,#bm_market{
+      width:100%;padding:8px;margin:6px 0 10px 0;box-sizing:border-box;
+      border-radius:5px;font-size:13px;outline:none;
     }
-
-    input:focus, select:focus {
-      border-color: ${c.border} !important;
-      box-shadow: 0 0 0 2px rgba(33,150,243,0.25) !important;
+    #bm_send,#bm_toggleTheme,#bm_syncToggle{
+      width:100%;padding:9px;margin-top:6px;
+      border:none;border-radius:6px;
+      cursor:pointer;font-weight:bold;font-size:13px;
+      transition:background 0.2s ease;
     }
-
-    #bm_send {
-      width: 100% !important;
-      padding: 8px 0 !important;
-      border-radius: 6px !important;
-      border: none !important;
-      background: ${c.accent} !important;
-      color: #fff !important;
-      font-size: 12px !important;
-      font-weight: 600 !important;
-      cursor: pointer !important;
-      transition: 0.2s !important;
-      margin-top: 6px !important;
-    }
-
-    #bm_send:hover { opacity: 0.85 !important; }
-
-    .bm-row {
-      display: flex !important;
-      gap: 6px !important;
-    }
-
-    .bm-row button {
-      flex: 1 !important;
-      padding: 6px 0 !important;
-      border-radius: 6px !important;
-      background: ${c.btnBg} !important;
-      color: ${c.fg} !important;
-      border: 1px solid ${c.btnBorder} !important;
-      font-size: 12px !important;
-      cursor: pointer !important;
-      transition: 0.2s !important;
-    }
-
-    .bm-row button:hover {
-      background: ${isDarkMode ? "#333" : "#e4eaf2"} !important;
-    }
-
-    #bm_status {
-      margin-top: 4px !important;
-      font-size: 11px !important;
-      color: ${c.fg} !important;
-      text-align: center !important;
-    }
-
-    hr {
-      border: none !important;
-      border-top: 1px solid ${c.inputBorder} !important;
-      margin: 8px 0 !important;
-    }
+    #bm_status{margin-top:5px;font-family:monospace;font-size:12px;white-space:pre-wrap;}
+    select, input, button { touch-action: manipulation; }
   `;
   document.head.appendChild(style);
 
   const applyTheme=()=>{
     c=getTheme();
-    panel.style.background=c.bg;
-    panel.style.color=c.fg;
+    panel.style.background=c.bg;panel.style.color=c.fg;panel.style.border=`1.5px solid ${c.border}`;
     header.style.background=c.header;
+    document.querySelectorAll('#bm_user_link,#bm_action,#bm_policy,#bm_market').forEach(el=>{
+      el.style.background=c.inputBg;el.style.border=`1px solid ${c.inputBorder}`;el.style.color=c.fg;
+    });
+    const send=document.getElementById('bm_send');
+    const theme=document.getElementById('bm_toggleTheme');
+    const sync=document.getElementById('bm_syncToggle');
+    send.style.background=c.accent;send.style.color='#fff';
+    [theme,sync].forEach(b=>{
+      b.style.background=c.btnBg;b.style.border=`1px solid ${c.btnBorder}`;b.style.color=c.fg;
+    });
   };
 
-  const savePrefs=()=>localStorage.setItem(PREF_KEY,JSON.stringify({isDarkMode,autoSync}));
+  const savePrefs=()=>{ localStorage.setItem(PREF_KEY,JSON.stringify({isDarkMode,autoSync})); };
 
-  document.getElementById('bm_toggleTheme').addEventListener('click',()=>{
-    isDarkMode=!isDarkMode;applyTheme();savePrefs();
-  });
+  document.getElementById('bm_toggleTheme').addEventListener('click',()=>{ isDarkMode=!isDarkMode;applyTheme();savePrefs(); });
   document.getElementById('bm_syncToggle').addEventListener('click',()=>{
     autoSync=!autoSync;
-    document.getElementById('bm_syncToggle').textContent=autoSync?"🔁":"⛔";
+    document.getElementById('bm_syncToggle').textContent=`🔁 Otomatik Senkron: ${autoSync?"Açık":"Kapalı"}`;
     savePrefs();
   });
 
-  toggleBtn.addEventListener('click',()=>panel.style.display = (panel.style.display==="none")?"block":"none");
+  const togglePanel=()=>{ panel.style.display = (panel.style.display==="none") ? "block" : "none"; };
+  toggleBtn.addEventListener('click',togglePanel);
+  toggleBtn.addEventListener('touchstart',togglePanel);
+
+  let dragging=false,startX=0,startY=0,offsetX=0,offsetY=0;
+  const startDrag=(x,y)=>{ dragging=true; offsetX=x-panel.getBoundingClientRect().left; offsetY=y-panel.getBoundingClientRect().top; };
+  const moveDrag=(x,y)=>{ if(!dragging)return; panel.style.left=(x-offsetX)+'px'; panel.style.top=(y-offsetY)+'px'; panel.style.transform='none'; };
+  const endDrag=()=>{ dragging=false; };
+  header.addEventListener('mousedown',e=>startDrag(e.clientX,e.clientY));
+  header.addEventListener('touchstart',e=>startDrag(e.touches[0].clientX,e.touches[0].clientY));
+  document.addEventListener('mousemove',e=>moveDrag(e.clientX,e.clientY));
+  document.addEventListener('touchmove',e=>moveDrag(e.touches[0].clientX,e.touches[0].clientY));
+  document.addEventListener('mouseup',endDrag);
+  document.addEventListener('touchend',endDrag);
 
   document.getElementById('bm_send').addEventListener('click',()=>{
     const user=document.getElementById('bm_user_link').value.trim();
-    if(!user){alert('⚠️ Kullanıcı linkini giriniz.');return;}
+    if(!user){alert('Kullanıcı linkini gir.');return;}
     const base='https://brainly-trustandsafety.zendesk.com/hc/en-us/requests/new?ticket_form_id=9719157534610';
     const params=`&bm_user=${encodeURIComponent(user)}&bm_action=${encodeURIComponent(document.getElementById('bm_action').value)}&bm_policy=${encodeURIComponent(document.getElementById('bm_policy').value)}&bm_market=${encodeURIComponent(document.getElementById('bm_market').value)}`;
     const w=window.open(base+params,'_blank');
@@ -206,9 +183,7 @@
     status.textContent=`✅ Gönderildi: ${user}`;
   });
 
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
-    if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();}
-  });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{ if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();} });
 
   applyTheme();
 })();
