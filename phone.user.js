@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Stable + Mobile Fixed Scrollable Policy + AutoUpdate)
+// @name         Brainly Moderation Panel PLUS5 (Stable + Mobile Fixed Scrollable Policy + AutoUpdate + AutoDetect Profile)
 // @namespace    http://tampermonkey.net/
-// @version      4.2
+// @version      4.5
 // @description  Roma formu moderasyon paneli mobil uyumlu 
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
@@ -175,6 +175,29 @@
   });
 
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{ if(autoSync){isDarkMode=e.matches;applyTheme();savePrefs();} });
+
+  function detectProfileLink() {
+    const url = window.location.href;
+    const input = document.getElementById('bm_user_link');
+    if (!input) return;
+
+    if (url.includes("/profil/")) {
+      input.value = url.split("?")[0];
+    } else if (url.includes("/bans/ban/")) {
+      const id = url.match(/ban\/(\d+)/)?.[1];
+      if (id) input.value = `https://eodev.com/profil/USER-${id}`;
+    }
+  }
+
+  window.addEventListener('load',()=>setTimeout(detectProfileLink,1000));
+
+  let lastUrl = location.href;
+  new MutationObserver(()=>{
+    if(location.href !== lastUrl){
+      lastUrl = location.href;
+      detectProfileLink();
+    }
+  }).observe(document,{subtree:true,childList:true});
 
   applyTheme();
 })();
