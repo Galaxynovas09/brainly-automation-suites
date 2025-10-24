@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Mobile Optimized for Kiwi Browser)
+// @name         Brainly Moderation Panel PLUS5 (Mobile Optimized + Kiwi Compatible + AutoUpdate + AutoDetect Profile + AutoBanDetect)
 // @namespace    http://tampermonkey.net/
-// @version      8.9
-// @description  Roma Formu Moderasyon Paneli 
+// @version      9.2
+// @description  Roma Formu Moderasyon Paneli Mobil Uyumlu
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
 // @downloadURL  https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
@@ -31,58 +31,30 @@
 
   const toggleBtn = document.createElement('button');
   Object.assign(toggleBtn.style, {
-    position: 'fixed',
-    bottom: '20px',
-    right: '20px',
-    padding: '10px 14px',
-    fontSize: '14px',
-    backgroundColor: c.accent,
-    color: '#fff',
-    border: 'none',
-    borderRadius: '50%',
-    boxShadow: '0 3px 8px rgba(0,0,0,0.3)',
-    cursor: 'pointer',
-    zIndex: 9999999,
-    fontWeight: '600',
-    width: '56px',
-    height: '56px'
+    position: 'fixed', bottom: '15px', right: '15px', padding: '8px 12px',
+    backgroundColor: c.accent, color: '#fff', border: 'none', borderRadius: '50px',
+    cursor: 'pointer', zIndex: 9999999, fontWeight: '600', fontSize: '13px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.3)', touchAction: 'manipulation'
   });
-  toggleBtn.textContent = "📝";
+  toggleBtn.textContent = "🧩 Panel";
   document.body.appendChild(toggleBtn);
 
   const panel = document.createElement('div');
   Object.assign(panel.style, {
-    position: 'fixed',
-    bottom: '90px',
-    right: '10px',
-    width: '90vw',
-    maxWidth: '360px',
-    height: '65vh',
-    background: c.bg,
-    color: c.fg,
-    border: `1.5px solid ${c.border}`,
-    borderRadius: '14px',
-    overflowY: 'auto',
-    zIndex: 9999998,
-    fontFamily: 'Inter, Arial, sans-serif',
-    fontSize: '13px',
-    boxShadow: '0 3px 15px rgba(0,0,0,0.4)',
-    display: 'none',
-    boxSizing: 'border-box'
+    position: 'fixed', bottom: '65px', right: '10px',
+    width: '90vw', maxWidth: '320px', height: '70vh', maxHeight: '480px',
+    background: c.bg, color: c.fg, border: `1.5px solid ${c.border}`,
+    zIndex: 9999998, fontFamily: 'Inter, Arial, sans-serif', fontSize: '13px',
+    borderRadius: '12px', overflowY: 'auto', boxSizing: 'border-box', paddingBottom: '10px',
+    boxShadow: '0 3px 10px rgba(0,0,0,0.3)', display: 'none'
   });
 
   const header = document.createElement('div');
   header.textContent = "Brainly Moderation Panel";
   Object.assign(header.style, {
-    background: c.header,
-    color: '#fff',
-    padding: '10px',
-    textAlign: 'center',
-    fontWeight: '600',
-    fontSize: '13.5px',
-    borderTopLeftRadius: '14px',
-    borderTopRightRadius: '14px',
-    userSelect: 'none'
+    background: c.header, color: '#fff', padding: '10px', cursor: 'grab',
+    fontWeight: '600', borderTopLeftRadius: '12px', borderTopRightRadius: '12px',
+    textAlign: 'center', fontSize: '13px', userSelect: 'none', touchAction: 'none'
   });
   panel.appendChild(header);
 
@@ -92,25 +64,37 @@
     <input id="bm_user_link" type="text" placeholder="Kullanıcı linki (https://...)" />
     <label>Aksiyon</label>
     <select id="bm_action">
-      <option value="action_taken_moderators_24_hour_suspension">24 saat</option>
-      <option value="action_taken_moderators_72_hour_suspension">72 saat</option>
-      <option value="action_taken_moderators_banned_the_user" selected>Kalıcı</option>
+      <option value="action_taken_moderators_24_hour_suspension">Kullanıcı 24 saat yasaklandı</option>
+      <option value="action_taken_moderators_72_hour_suspension">Kullanıcı 72 saat yasaklandı</option>
+      <option value="action_taken_moderators_banned_the_user" selected>Kalıcı yasaklandı</option>
     </select>
     <label>İhlal Türü</label>
-    <select id="bm_policy" size="1">
+    <select id="bm_policy">
       <option value="benzerlik_spami" selected>Benzerlik Spamı</option>
       <option value="spam">Meet Spam</option>
       <option value="ticari_spam">Ticari Spam</option>
       <option value="kufur">Küfür</option>
       <option value="zorbalik">Zorbalık</option>
       <option value="pornografi">Pornografi</option>
+      <option value="mustehcenlik">Müstehcenlik</option>
       <option value="nefret_soylemi">Nefret Söylemi</option>
+      <option value="kisisel_bilgi">Kişisel Bilgi</option>
+      <option value="sahte_kimlik">Sahte Kimlik</option>
+      <option value="cocuk_istismari">Çocuk İstismarı</option>
+      <option value="kendine_zarar">Kendine Zarar</option>
+      <option value="terorist_icerik">Terörist İçerik</option>
+      <option value="siddet_tehdidi">Şiddet Tehdidi</option>
+      <option value="yanlis_bilgi">Yanlış Bilgi</option>
       <option value="phishing">E-dolandırıcılık</option>
       <option value="intihal">Kopya / Sınav</option>
+      <option value="siddet_gorsel">Şiddet Görseli</option>
+      <option value="tehlikeli">Tehlikeli İçerik</option>
       <option value="other">Diğer</option>
     </select>
     <label>Market</label>
-    <select id="bm_market"><option value="turkey_clone" selected>Türkiye</option></select>
+    <select id="bm_market">
+      <option value="turkey_clone" selected>Türkiye</option>
+    </select>
     <button id="bm_send">Gönder</button>
     <div id="bm_status"></div>
     <hr>
@@ -122,24 +106,21 @@
 
   const style = document.createElement('style');
   style.textContent = `
-    #bm_user_link,#bm_action,#bm_policy,#bm_market {
-      width: 100%; padding: 10px; margin: 5px 0 8px 0;
-      border-radius: 8px; font-size: 13px;
-      border: 1px solid ${c.inputBorder};
-      background: ${c.inputBg}; color: ${c.fg};
+    #bm_policy {max-height:120px;overflow-y:auto;scrollbar-width:thin;}
+    #bm_policy::-webkit-scrollbar {width:6px;}
+    #bm_policy::-webkit-scrollbar-thumb {background:${isDarkMode ? "#555" : "#ccc"};border-radius:4px;}
+    #bm_user_link,#bm_action,#bm_policy,#bm_market{
+      width:100%;padding:8px;margin:6px 0;box-sizing:border-box;
+      border-radius:6px;font-size:13px;outline:none;
     }
-    #bm_send,#bm_toggleTheme,#bm_syncToggle {
-      width: 100%; padding: 10px; margin-top: 6px;
-      border: none; border-radius: 8px;
-      font-weight: 600; font-size: 13px;
-      cursor: pointer; touch-action: manipulation;
+    #bm_send,#bm_toggleTheme,#bm_syncToggle{
+      width:100%;padding:10px;margin-top:6px;
+      border:none;border-radius:6px;
+      cursor:pointer;font-weight:600;font-size:13px;
+      transition:background 0.2s ease;touch-action:manipulation;
     }
-    #bm_send {background:${c.accent}; color:#fff;}
-    #bm_status {margin-top:6px;font-size:11px;white-space:pre-wrap;}
-    @media (max-width:600px){
-      #bm_panel{width:92vw;right:4vw;bottom:90px;}
-      #bm_user_link,#bm_action,#bm_policy,#bm_market,#bm_send,#bm_toggleTheme,#bm_syncToggle{font-size:14px;}
-    }
+    #bm_status{margin-top:5px;font-family:monospace;font-size:12px;white-space:pre-wrap;}
+    select,input,button{touch-action:manipulation;}
   `;
   document.head.appendChild(style);
 
@@ -166,19 +147,37 @@
     });
   };
 
-  document.getElementById('bm_toggleTheme').onclick = () => { isDarkMode = !isDarkMode; applyTheme(); savePrefs(); };
-  document.getElementById('bm_syncToggle').onclick = () => {
+  document.getElementById('bm_toggleTheme').addEventListener('click', () => {
+    isDarkMode = !isDarkMode; applyTheme(); savePrefs();
+  });
+  document.getElementById('bm_syncToggle').addEventListener('click', () => {
     autoSync = !autoSync;
     document.getElementById('bm_syncToggle').textContent = `🔁 Senkron: ${autoSync ? "Açık" : "Kapalı"}`;
     savePrefs();
-  };
-  toggleBtn.onclick = () => {
-    panel.style.display = (panel.style.display === 'none') ? 'block' : 'none';
-  };
+  });
 
-  document.getElementById('bm_send').onclick = () => {
+  toggleBtn.addEventListener('click', () => {
+    panel.style.display = (panel.style.display === 'none') ? 'block' : 'none';
+  });
+
+  let touchStart = null;
+  header.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    touchStart = { x: t.clientX, y: t.clientY, left: panel.offsetLeft, top: panel.offsetTop };
+  });
+  header.addEventListener('touchmove', e => {
+    if (!touchStart) return;
+    const t = e.touches[0];
+    const dx = t.clientX - touchStart.x;
+    const dy = t.clientY - touchStart.y;
+    panel.style.left = (touchStart.left + dx) + 'px';
+    panel.style.top = (touchStart.top + dy) + 'px';
+  });
+  header.addEventListener('touchend', () => touchStart = null);
+
+  document.getElementById('bm_send').addEventListener('click', () => {
     const user = document.getElementById('bm_user_link').value.trim();
-    if (!user) return alert('Kullanıcı linkini gir.');
+    if (!user) { alert('Kullanıcı linkini gir.'); return; }
     const base = 'https://brainly-trustandsafety.zendesk.com/hc/en-us/requests/new?ticket_form_id=9719157534610';
     const params = `&bm_user=${encodeURIComponent(user)}&bm_action=${encodeURIComponent(document.getElementById('bm_action').value)}&bm_policy=${encodeURIComponent(document.getElementById('bm_policy').value)}&bm_market=${encodeURIComponent(document.getElementById('bm_market').value)}`;
     const w = window.open(base + params, '_blank');
@@ -186,7 +185,11 @@
     if (!w) { status.textContent = '❌ Pop-up engellendi — izin verin.'; return; }
     document.getElementById('bm_user_link').value = '';
     status.textContent = `✅ Gönderildi: ${user}`;
-  };
+  });
+
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+    if (autoSync) { isDarkMode = e.matches; applyTheme(); savePrefs(); }
+  });
 
   function detectProfileLink() {
     const url = window.location.href;
@@ -205,16 +208,29 @@
     for (const li of listItems) {
       const text = li.textContent.trim();
       if (!text.startsWith("SORULAR:")) continue;
+
       const span = li.querySelector("span.orange");
       if (!span) continue;
+
       const value = span.textContent.trim();
-      if (value.includes("24 saatliğine askıya al")) actionSelect.value = "action_taken_moderators_24_hour_suspension";
-      if (value.includes("72 saatliğine askıya al")) actionSelect.value = "action_taken_moderators_72_hour_suspension";
-      if (value.includes("Yasakla")) actionSelect.value = "action_taken_moderators_banned_the_user";
+
+      if (value.includes("24 saatliğine askıya al")) {
+        actionSelect.value = "action_taken_moderators_24_hour_suspension";
+        break;
+      }
+      if (value.includes("72 saatliğine askıya al")) {
+        actionSelect.value = "action_taken_moderators_72_hour_suspension";
+        break;
+      }
+      if (value.includes("Yasakla")) {
+        actionSelect.value = "action_taken_moderators_banned_the_user";
+        break;
+      }
     }
   }
 
-  window.addEventListener('load', () => setTimeout(detectProfileLink, 1000));
+  window.addEventListener('load', () => setTimeout(detectProfileLink, 1200));
+
   let lastUrl = location.href;
   new MutationObserver(() => {
     if (location.href !== lastUrl) {
