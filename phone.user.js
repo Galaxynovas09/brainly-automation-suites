@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Compact Modern UI + AutoUpdate + AutoDetect Profile + AutoBanDetect + Mobile Support)
+// @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Compact Modern UI + AutoUpdate + AutoDetect Profile + AutoBanDetect + Mobile Fix Guaranteed)
 // @namespace    http://tampermonkey.net/
-// @version      9.3
-// @description  Roma Formu Moderasyon Paneli Mobil Uyumlu 
+// @version      9.5
+// @description  Roma Formu Moderasyon Paneli Mobil Uyumlu
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
 // @downloadURL  https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
@@ -13,7 +13,6 @@
 (function () {
   'use strict';
 
-  // Mobil uyumluluk için viewport
   if (!document.querySelector('meta[name="viewport"]')) {
     const meta = document.createElement('meta');
     meta.name = 'viewport';
@@ -35,9 +34,7 @@
   };
   let c = getTheme();
 
-  const savePrefs = () => {
-    localStorage.setItem(PREF_KEY, JSON.stringify({ isDarkMode, autoSync }));
-  };
+  const savePrefs = () => localStorage.setItem(PREF_KEY, JSON.stringify({ isDarkMode, autoSync }));
 
   const toggleBtn = document.createElement('button');
   Object.assign(toggleBtn.style, {
@@ -58,8 +55,7 @@
     borderRadius: '10px', overflowY: 'auto', resize: 'both',
     boxSizing: 'border-box', paddingBottom: '10px',
     boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
-    display: 'none',
-    touchAction: 'none'
+    display: 'none', touchAction: 'none'
   });
 
   const header = document.createElement('div');
@@ -124,15 +120,13 @@
     #bm_policy::-webkit-scrollbar-thumb {background:${isDarkMode ? "#555" : "#ccc"};border-radius:4px;}
     #bm_user_link,#bm_action,#bm_policy,#bm_market{
       width:100%;padding:6px;margin:4px 0 8px 0;box-sizing:border-box;
-      border-radius:6px;font-size:12.5px;outline:none;
-      touch-action:manipulation;
+      border-radius:6px;font-size:12.5px;outline:none;touch-action:manipulation;
     }
     #bm_send,#bm_toggleTheme,#bm_syncToggle{
       width:100%;padding:8px;margin-top:5px;
       border:none;border-radius:6px;
       cursor:pointer;font-weight:600;font-size:12.5px;
-      transition:background 0.2s ease;
-      touch-action:manipulation;
+      transition:background 0.2s ease;touch-action:manipulation;
     }
     #bm_status{margin-top:4px;font-family:monospace;font-size:11px;white-space:pre-wrap;}
   `;
@@ -174,22 +168,6 @@
     panel.style.display = (panel.style.display === 'none') ? 'block' : 'none';
   });
 
-  // Dokunmatik sürükleme desteği (mobil için)
-  let touchStart = null;
-  header.addEventListener('touchstart', e => {
-    const t = e.touches[0];
-    touchStart = { x: t.clientX, y: t.clientY, left: panel.offsetLeft, top: panel.offsetTop };
-  });
-  header.addEventListener('touchmove', e => {
-    if (!touchStart) return;
-    const t = e.touches[0];
-    const dx = t.clientX - touchStart.x;
-    const dy = t.clientY - touchStart.y;
-    panel.style.left = (touchStart.left + dx) + 'px';
-    panel.style.top = (touchStart.top + dy) + 'px';
-  });
-  header.addEventListener('touchend', () => touchStart = null);
-
   document.getElementById('bm_send').addEventListener('click', () => {
     const user = document.getElementById('bm_user_link').value.trim();
     if (!user) { alert('Kullanıcı linkini gir.'); return; }
@@ -200,10 +178,6 @@
     if (!w) { status.textContent = '❌ Pop-up engellendi — izin verin.'; return; }
     document.getElementById('bm_user_link').value = '';
     status.textContent = `✅ Gönderildi: ${user}`;
-  });
-
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-    if (autoSync) { isDarkMode = e.matches; applyTheme(); savePrefs(); }
   });
 
   function detectProfileLink() {
@@ -228,7 +202,6 @@
       if (!span) continue;
 
       const value = span.textContent.trim();
-
       if (value.includes("24 saatliğine askıya al")) {
         actionSelect.value = "action_taken_moderators_24_hour_suspension";
         break;
@@ -244,7 +217,17 @@
     }
   }
 
-  window.addEventListener('load', () => setTimeout(detectProfileLink, 1000));
+  let detectTries = 0;
+  function retryDetect() {
+    detectProfileLink();
+    detectTries++;
+    const linkValue = document.getElementById('bm_user_link')?.value;
+    if ((!linkValue || linkValue.trim() === '') && detectTries < 10) {
+      setTimeout(retryDetect, 1500);
+    }
+  }
+
+  window.addEventListener('load', () => setTimeout(retryDetect, 1000));
 
   let lastUrl = location.href;
   new MutationObserver(() => {
