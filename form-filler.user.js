@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Brainly Trust & Safety Auto Filler PLUS5 (Login Aware + Remote Toggle)
 // @namespace    http://tampermonkey.net/
-// @version      1.9
+// @version      2.7
 // @description  Panelden gelen policy ve bilgileri otomatik doldurur. Giriş ekranında durur, uzaktan kapatma desteklidir.
 // @match        https://brainly-trustandsafety.zendesk.com/hc/*/requests/new*
 // @grant        none
@@ -19,7 +19,6 @@
     return;
   }
 
-  // 🔹 Eğer giriş sayfasındaysa script durdur
   if (document.title.includes("Sign in") || document.querySelector("form[action*='sign_in']")) {
     console.log("⏸ Login page detected, script paused.");
     return;
@@ -46,20 +45,27 @@
       const policyKey   = decodeURIComponent(bm_policy);
 
       const policyMap = {
-          spam: "policy_violation_spam",
-          ticari_spam: "policy_violation_commercial_spam",
-          kufur: "policy_violation_profanity",
-          benzerlik_spami: "policy_violation_similarity_spam",
-          zorbalik: "policy_violation_bullying",
-          taciz: "policy_violation_harassment",
-          terorist_icerik: "policy_violation_terrorism",
-          intihal: "policy_violation_plagiarism",
-          nefret_soylemi: "policy_violation_hate_speech",
-          mustehcenlik: "policy_violation_obscenity",
-          kisisel_bilgi: "policy_violation_pii",
-          meet_baglantilari: "policy_violation_meet_links",
-          other: "policy_violation_other"
-      };
+    benzerlik_spami: "policy_violation_similarity_spam",
+    spam: "policy_violation_spam",
+    ticari_spam: "policy_violation_commercial_spam",
+    kufur: "policy_violation_profanity",
+    zorbalik: "policy_violation_bullying___harassment",
+    pornografi: "policy_violation_pornography",
+    mustehcenlik: "policy_violation_obscenity",
+    nefret_soylemi: "policy_violation_hate_speech",
+    kisisel_bilgi: "policy_violation_personal_identifiable_information",
+    sahte_kimlik: "policy_violation_impersonation",
+    cocuk_istismari: "policy_violation_child_abuse",
+    kendine_zarar: "policy_violation_self-harm",
+    terorist_icerik: "policy_violation_terrorist_content",
+    siddet_tehdidi: "policy_violation_violent_threat",
+    yanlis_bilgi: "policy_violation_misinformation___disinformation",
+    phishing: "policy_violation_phishing_malware",
+    intihal: "policy_violation_exam_cheating",
+    siddet_gorsel: "policy_violation_graphic_violence",
+    tehlikeli: "policy_violation_illicit_dangerous",
+    other: "policy_violation_other"
+};
 
       const selectedPolicy = policyMap[policyKey] || "policy_violation_similarity_spam";
 
