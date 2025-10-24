@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Manual Open Only + Compact Modern UI + AutoUpdate + AutoDetect Profile + AutoBanDetect + Mobile/Kiwi Compatible)
+// @name         Brainly Moderation Panel PLUS5 (Mobile Only + Compact Modern UI + AutoUpdate + AutoDetect Profile + AutoBanDetect)
 // @namespace    http://tampermonkey.net/
-// @version      6.1
-// @description  Roma Formu Moderasyon Paneli Mobil Uyumlu
+// @version      7.2-mobile
+// @description  Roma Formu Moderasyon Paneli Mobil 
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
 // @downloadURL  https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
@@ -12,6 +12,8 @@
 
 (function () {
   'use strict';
+
+  if (!/Mobi|Android|iPhone|iPad|iPod|Kiwi/i.test(navigator.userAgent)) return;
 
   const PREF_KEY = "bm_panel_prefs_v8";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
@@ -27,42 +29,42 @@
   };
   let c = getTheme();
 
-  const savePrefs = () => localStorage.setItem(PREF_KEY, JSON.stringify({ isDarkMode, autoSync }));
+  const savePrefs = () => {
+    localStorage.setItem(PREF_KEY, JSON.stringify({ isDarkMode, autoSync }));
+  };
 
   const toggleBtn = document.createElement('button');
   Object.assign(toggleBtn.style, {
-    position: 'fixed', bottom: '15px', right: '15px',
-    padding: '10px 14px', backgroundColor: c.accent, color: '#fff',
-    border: 'none', borderRadius: '50px', fontSize: '13px',
-    cursor: 'pointer', zIndex: 9999999, fontWeight: '600',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.25)', userSelect: 'none'
+    position: 'fixed', top: '12px', right: '12px', padding: '8px 10px',
+    backgroundColor: c.accent, color: '#fff', border: 'none', borderRadius: '10px',
+    cursor: 'pointer', zIndex: 9999999, fontWeight: '600', fontSize: '13px',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.25)', touchAction: 'manipulation'
   });
   toggleBtn.textContent = "📝 Brainly";
   document.body.appendChild(toggleBtn);
 
   const panel = document.createElement('div');
   Object.assign(panel.style, {
-    position: 'fixed', bottom: '70px', right: '10px',
-    width: '88vw', maxWidth: '300px', height: '65vh',
+    position: 'fixed', top: '70px', right: '10px',
+    width: '90vw', maxWidth: '340px', height: '75vh', maxHeight: '520px',
     background: c.bg, color: c.fg, border: `1.5px solid ${c.border}`,
     zIndex: 9999998, fontFamily: 'Inter, Arial, sans-serif', fontSize: '13px',
-    borderRadius: '10px', overflowY: 'auto', resize: 'none',
-    boxSizing: 'border-box', paddingBottom: '10px',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
-    display: 'none'
+    borderRadius: '12px', overflowY: 'auto', boxSizing: 'border-box', paddingBottom: '10px',
+    boxShadow: '0 3px 12px rgba(0,0,0,0.35)', display: 'none',
+    WebkitOverflowScrolling: 'touch'
   });
 
   const header = document.createElement('div');
   header.textContent = "Brainly Moderation Panel";
   Object.assign(header.style, {
     background: c.header, color: '#fff', padding: '8px', cursor: 'move',
-    fontWeight: '600', borderTopLeftRadius: '10px', borderTopRightRadius: '10px',
+    fontWeight: '600', borderTopLeftRadius: '12px', borderTopRightRadius: '12px',
     textAlign: 'center', fontSize: '13px', userSelect: 'none'
   });
   panel.appendChild(header);
 
   const content = document.createElement('div');
-  content.style.padding = "8px";
+  content.style.padding = "10px";
   content.innerHTML = `
     <input id="bm_user_link" type="text" placeholder="Kullanıcı linki (https://...)" />
     <label>Aksiyon</label>
@@ -110,20 +112,19 @@
   const style = document.createElement('style');
   style.textContent = `
     #bm_policy {max-height:120px;overflow-y:auto;scrollbar-width:thin;}
-    #bm_policy::-webkit-scrollbar {width:6px;}
-    #bm_policy::-webkit-scrollbar-thumb {background:${isDarkMode ? "#555" : "#ccc"};border-radius:4px;}
     #bm_user_link,#bm_action,#bm_policy,#bm_market{
       width:100%;padding:8px;margin:4px 0 8px 0;box-sizing:border-box;
       border-radius:8px;font-size:13px;outline:none;
     }
     #bm_send,#bm_toggleTheme,#bm_syncToggle{
-      width:100%;padding:9px;margin-top:6px;
+      width:100%;padding:10px;margin-top:6px;
       border:none;border-radius:8px;
       cursor:pointer;font-weight:600;font-size:13px;
       transition:background 0.2s ease;
       touch-action:manipulation;
     }
-    #bm_status{margin-top:6px;font-family:monospace;font-size:11px;white-space:pre-wrap;}
+    #bm_status{margin-top:4px;font-family:monospace;font-size:11px;white-space:pre-wrap;}
+    select,input,button{touch-action:manipulation;}
   `;
   document.head.appendChild(style);
 
@@ -138,47 +139,53 @@
       el.style.border = `1px solid ${c.inputBorder}`;
       el.style.color = c.fg;
     });
-    ['bm_send','bm_toggleTheme','bm_syncToggle'].forEach(id=>{
-      const b=document.getElementById(id);
-      if(!b)return;
-      b.style.background = id==='bm_send'?c.accent:c.btnBg;
-      b.style.color = id==='bm_send'?'#fff':c.fg;
-      b.style.border = `1px solid ${id==='bm_send'?'transparent':c.btnBorder}`;
+    const send = document.getElementById('bm_send');
+    const theme = document.getElementById('bm_toggleTheme');
+    const sync = document.getElementById('bm_syncToggle');
+    send.style.background = c.accent;
+    send.style.color = '#fff';
+    [theme, sync].forEach(b => {
+      b.style.background = c.btnBg;
+      b.style.border = `1px solid ${c.btnBorder}`;
+      b.style.color = c.fg;
     });
   };
 
-  document.getElementById('bm_toggleTheme').addEventListener('click', () => { isDarkMode = !isDarkMode; applyTheme(); savePrefs(); });
+  document.getElementById('bm_toggleTheme').addEventListener('click', () => {
+    isDarkMode = !isDarkMode; applyTheme(); savePrefs();
+  });
   document.getElementById('bm_syncToggle').addEventListener('click', () => {
     autoSync = !autoSync;
     document.getElementById('bm_syncToggle').textContent = `🔁 Senkron: ${autoSync ? "Açık" : "Kapalı"}`;
     savePrefs();
   });
 
-  toggleBtn.addEventListener('click', () => { panel.style.display = (panel.style.display === 'none') ? 'block' : 'none'; });
+  toggleBtn.addEventListener('click', () => {
+    panel.style.display = (panel.style.display === 'none') ? 'block' : 'none';
+  });
 
-  let dragging = false, startX = 0, startY = 0, startLeft = 0, startTop = 0;
-  const dragStart = e => {
+  let dragging = false, startX = 0, startY = 0, offsetX = 0, offsetY = 0;
+  const startDrag = e => {
     dragging = true;
-    const touch = e.touches ? e.touches[0] : e;
-    startX = touch.clientX;
-    startY = touch.clientY;
-    startLeft = panel.offsetLeft;
-    startTop = panel.offsetTop;
+    const t = e.touches ? e.touches[0] : e;
+    startX = t.clientX;
+    startY = t.clientY;
+    offsetX = panel.offsetLeft;
+    offsetY = panel.offsetTop;
   };
-  const dragMove = e => {
+  const moveDrag = e => {
     if (!dragging) return;
-    const touch = e.touches ? e.touches[0] : e;
-    panel.style.left = startLeft + (touch.clientX - startX) + 'px';
-    panel.style.top = startTop + (touch.clientY - startY) + 'px';
+    const t = e.touches ? e.touches[0] : e;
+    panel.style.left = (offsetX + (t.clientX - startX)) + 'px';
+    panel.style.top = (offsetY + (t.clientY - startY)) + 'px';
   };
-  const dragEnd = () => dragging = false;
-
-  header.addEventListener('mousedown', dragStart);
-  header.addEventListener('touchstart', dragStart);
-  document.addEventListener('mousemove', dragMove);
-  document.addEventListener('touchmove', dragMove);
-  document.addEventListener('mouseup', dragEnd);
-  document.addEventListener('touchend', dragEnd);
+  const stopDrag = () => dragging = false;
+  header.addEventListener('mousedown', startDrag);
+  header.addEventListener('touchstart', startDrag);
+  document.addEventListener('mousemove', moveDrag);
+  document.addEventListener('touchmove', moveDrag);
+  document.addEventListener('mouseup', stopDrag);
+  document.addEventListener('touchend', stopDrag);
 
   document.getElementById('bm_send').addEventListener('click', () => {
     const user = document.getElementById('bm_user_link').value.trim();
@@ -202,8 +209,9 @@
     const actionSelect = document.getElementById('bm_action');
     if (!input || !actionSelect) return;
 
-    if (url.includes("/profil/")) input.value = url.split("?")[0];
-    else if (url.includes("/bans/ban/")) {
+    if (url.includes("/profil/")) {
+      input.value = url.split("?")[0];
+    } else if (url.includes("/bans/ban/")) {
       const id = url.match(/ban\/(\d+)/)?.[1];
       if (id) input.value = `https://eodev.com/profil/USER-${id}`;
     }
@@ -215,14 +223,26 @@
       const span = li.querySelector("span.orange");
       if (!span) continue;
       const value = span.textContent.trim();
-      if (value.includes("24 saatliğine askıya al")) { actionSelect.value = "action_taken_moderators_24_hour_suspension"; break; }
-      if (value.includes("72 saatliğine askıya al")) { actionSelect.value = "action_taken_moderators_72_hour_suspension"; break; }
-      if (value.includes("Yasakla")) { actionSelect.value = "action_taken_moderators_banned_the_user"; break; }
+      if (value.includes("24 saatliğine askıya al")) {
+        actionSelect.value = "action_taken_moderators_24_hour_suspension"; break;
+      }
+      if (value.includes("72 saatliğine askıya al")) {
+        actionSelect.value = "action_taken_moderators_72_hour_suspension"; break;
+      }
+      if (value.includes("Yasakla")) {
+        actionSelect.value = "action_taken_moderators_banned_the_user"; break;
+      }
     }
   }
 
   window.addEventListener('load', () => setTimeout(detectProfileLink, 1000));
   let lastUrl = location.href;
-  new MutationObserver(() => { if (location.href !== lastUrl) { lastUrl = location.href; detectProfileLink(); } }).observe(document, { subtree: true, childList: true });
+  new MutationObserver(() => {
+    if (location.href !== lastUrl) {
+      lastUrl = location.href;
+      detectProfileLink();
+    }
+  }).observe(document, { subtree: true, childList: true });
+
   applyTheme();
 })();
