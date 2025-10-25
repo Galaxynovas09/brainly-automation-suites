@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Trust & Safety Auto Filler PLUS5 (Login Aware + Remote Toggle)
+// @name         Brainly Trust & Safety Auto Filler PLUS5 (Login Aware + Remote Toggle + Mobile Close Fix)
 // @namespace    http://tampermonkey.net/
-// @version      7.2
-// @description  Panelden gelen policy ve bilgileri otomatik doldurma sistemi
+// @version      8.1
+// @description  Panelden gelen policy ve bilgileri otomatik doldurur 
 // @match        https://brainly-trustandsafety.zendesk.com/hc/*/requests/new*
 // @match        https://brainly-trustandsafety.zendesk.com/hc/en-us*
 // @grant        none
@@ -20,14 +20,31 @@
     return;
   }
 
-  if (document.title.includes("Sign in") || document.querySelector("form[action*='sign_in']")) {
-    console.log("⏸ Login page detected, script paused.");
+  if (window.location.href.includes("return_to=%2Fhc%2Frequests")) {
+    console.log("✅ Form gönderildi, yönlendirme sayfası açıldı. Sekme 1 saniye içinde kapanıyor...");
+
+    setTimeout(() => {
+      try {
+
+        const btn = document.createElement('button');
+        btn.style.display = 'none';
+        btn.onclick = () => window.close();
+        document.body.appendChild(btn);
+        btn.click();
+        btn.remove();
+
+        // Ek güvenlik: kapanmazsa ikinci deneme
+        setTimeout(() => window.close(), 500);
+      } catch (e) {
+        console.error("Kapanma işlemi başarısız:", e);
+      }
+    }, 1000);
+
     return;
   }
 
-  if (window.location.href.includes("return_to=%2Fhc%2Frequests")) {
-    console.log("✅ Form gönderildi, yönlendirme sayfası açıldı. Sekme 1 saniye içinde kapanıyor...");
-    setTimeout(() => window.close(), 1000);
+  if (document.title.includes("Sign in") || document.querySelector("form[action*='sign_in']")) {
+    console.log("⏸ Login page detected, script paused.");
     return;
   }
 
@@ -112,11 +129,10 @@
           const aTag = warningField.parentElement.querySelector('a.nesty-input');
           if (aTag) aTag.textContent = "Yes";
         }
-
+        
         form.submit();
         history.replaceState(null, '', location.origin + location.pathname);
         console.log("✅ Form dolduruldu ve gönderildi. Policy:", selectedPolicy);
-
         return true;
       } catch (e) {
         console.error("Fill error:", e);
