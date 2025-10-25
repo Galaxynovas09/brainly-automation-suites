@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Trust & Safety Auto Filler PLUS5 (Login Aware + Remote Toggle + Mobile Close Fix)
+// @name         Brainly Trust & Safety Auto Filler PLUS5 (Login Aware + Remote Toggle + Mobile Safe Close)
 // @namespace    http://tampermonkey.net/
-// @version      8.1
-// @description  Panelden gelen policy ve bilgileri otomatik doldurur 
+// @version      8.7
+// @description  Panelden gelen policy ve bilgileri otomatik doldurur. Form gönderildikten sonra yönlendirme sayfasına gidince sekme otomatik kapanır (mobilde garanti çalışır).
 // @match        https://brainly-trustandsafety.zendesk.com/hc/*/requests/new*
 // @match        https://brainly-trustandsafety.zendesk.com/hc/en-us*
 // @grant        none
@@ -22,24 +22,13 @@
 
   if (window.location.href.includes("return_to=%2Fhc%2Frequests")) {
     console.log("✅ Form gönderildi, yönlendirme sayfası açıldı. Sekme 1 saniye içinde kapanıyor...");
-
     setTimeout(() => {
       try {
-
-        const btn = document.createElement('button');
-        btn.style.display = 'none';
-        btn.onclick = () => window.close();
-        document.body.appendChild(btn);
-        btn.click();
-        btn.remove();
-
-        // Ek güvenlik: kapanmazsa ikinci deneme
-        setTimeout(() => window.close(), 500);
+        window.close();
       } catch (e) {
-        console.error("Kapanma işlemi başarısız:", e);
+        console.error("Kapanma başarısız:", e);
       }
     }, 1000);
-
     return;
   }
 
@@ -129,10 +118,11 @@
           const aTag = warningField.parentElement.querySelector('a.nesty-input');
           if (aTag) aTag.textContent = "Yes";
         }
-        
+
         form.submit();
         history.replaceState(null, '', location.origin + location.pathname);
         console.log("✅ Form dolduruldu ve gönderildi. Policy:", selectedPolicy);
+
         return true;
       } catch (e) {
         console.error("Fill error:", e);
