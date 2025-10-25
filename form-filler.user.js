@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Trust & Safety Auto Filler PLUS5 (Login Aware + Remote Toggle + Mobile Safe Close)
+// @name         Brainly Trust & Safety Auto Filler PLUS5 (Mobile Guaranteed Close)
 // @namespace    http://tampermonkey.net/
-// @version      8.7
-// @description  Panelden gelen policy ve bilgileri otomatik doldurur. Form gönderildikten sonra yönlendirme sayfasına gidince sekme otomatik kapanır (mobilde garanti çalışır).
+// @version      9.1
+// @description  Form doldurur, gönderir 
 // @match        https://brainly-trustandsafety.zendesk.com/hc/*/requests/new*
 // @match        https://brainly-trustandsafety.zendesk.com/hc/en-us*
 // @grant        none
@@ -19,16 +19,36 @@
     console.log("⛔ Form filler disabled remotely");
     return;
   }
-
+  
   if (window.location.href.includes("return_to=%2Fhc%2Frequests")) {
-    console.log("✅ Form gönderildi, yönlendirme sayfası açıldı. Sekme 1 saniye içinde kapanıyor...");
+    console.log("✅ Form gönderildi, yönlendirme sayfası açıldı. Mobilde kapanma tetikleniyor...");
+
     setTimeout(() => {
       try {
-        window.close();
+   
+        const btn = document.createElement('button');
+        btn.innerText = "close";
+        btn.style.cssText = "position:fixed;top:-100px;opacity:0;";
+        btn.onclick = () => {
+          console.log("🟢 Kapanma eylemi tetiklendi.");
+          window.open('', '_self'); 
+          window.close();
+        };
+        document.body.appendChild(btn);
+        btn.click();
+        btn.remove();
+
+     
+        setTimeout(() => {
+          try {
+            window.open('', '_self');
+            window.close();
+          } catch (e2) {}
+        }, 1000);
       } catch (e) {
-        console.error("Kapanma başarısız:", e);
+        console.error("❌ Mobil kapanma hatası:", e);
       }
-    }, 1000);
+    }, 800);
     return;
   }
 
