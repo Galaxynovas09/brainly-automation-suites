@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Brainly Moderation Panel PLUS5 (Mobile + AutoDetect Duration + Proxy Fix + AutoUpdate)
 // @namespace    http://tampermonkey.net/
-// @version      8.2
+// @version      3.9
 // @description  Roma Formu Moderasyon Paneli 
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
