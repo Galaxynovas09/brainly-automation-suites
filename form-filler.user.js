@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Brainly Trust & Safety Auto Filler PLUS5 (Mobile Guaranteed Close)
 // @namespace    http://tampermonkey.net/
-// @version      9.1
+// @version      3.9
 // @description  Form doldurur, gönderir 
 // @match        https://brainly-trustandsafety.zendesk.com/hc/*/requests/new*
 // @match        https://brainly-trustandsafety.zendesk.com/hc/en-us*
