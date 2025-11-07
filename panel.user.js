@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Brainly Moderation Panel PLUS5 (Mobile + AutoDetect Duration + Proxy Fix + AutoUpdate)
 // @namespace    http://tampermonkey.net/
-// @version      4.1
+// @version      3.9
 // @description  Roma Formu Moderasyon Paneli
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
@@ -65,7 +65,7 @@
     <select id="bm_action">
       <option value="action_taken_moderators_24_hour_suspension">Kullanıcı 24 saat yasaklandı</option>
       <option value="action_taken_moderators_72_hour_suspension">Kullanıcı 72 saat yasaklandı</option>
-      <option value="action_taken_moderators_banned_the_user" selected>Kalıcı yasaklandı</option> 
+      <option value="action_taken_moderators_banned_the_user" selected>Kalıcı yasaklandı</option>
     </select>
 
     <label>İhlal Türü</label>
