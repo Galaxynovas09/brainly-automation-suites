@@ -2,7 +2,7 @@
 // @name         Brainly Moderation Panel PLUS5 (Mobile + AutoDetect Duration + Proxy Fix + AutoUpdate)
 // @namespace    http://tampermonkey.net/
 // @version      3.9
-// @description  Roma Formu Moderasyon Paneli 
+// @description  Roma Formu Moderasyon Paneli
 // @match        *://*/*
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
 // @downloadURL  https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
@@ -15,18 +15,19 @@
 
   const PREF_KEY = "bm_panel_prefs_v8";
   const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
+
   let isDarkMode = saved.isDarkMode ?? window.matchMedia('(prefers-color-scheme: dark)').matches;
   let autoSync = saved.autoSync ?? true;
 
   const getTheme = () => isDarkMode ? {
-    bg: '#181818', fg: '#f1f1f1', border: '#3f51b5', accent: '#2196f3', header: '#1976d2',
-    inputBg: '#202020', inputBorder: '#333', btnBg: '#2a2a2a', btnBorder: '#555'
+    bg: '#181818', fg: '#f1f1f1', border: '#3f51b5', accent: '#2196f3',
+    header: '#1976d2', inputBg: '#202020', inputBorder: '#333', btnBg: '#2a2a2a', btnBorder: '#555'
   } : {
-    bg: '#ffffff', fg: '#111', border: '#1976d2', accent: '#1976d2', header: '#1976d2',
-    inputBg: '#fff', inputBorder: '#ccc', btnBg: '#f5f5f5', btnBorder: '#bbb'
+    bg: '#ffffff', fg: '#111', border: '#1976d2', accent: '#1976d2',
+    header: '#1976d2', inputBg: '#fff', inputBorder: '#ccc', btnBg: '#f5f5f5', btnBorder: '#bbb'
   };
-  let c = getTheme();
 
+  let c = getTheme();
   const savePrefs = () => localStorage.setItem(PREF_KEY, JSON.stringify({ isDarkMode, autoSync }));
 
   const toggleBtn = document.createElement('button');
@@ -40,14 +41,11 @@
 
   const panel = document.createElement('div');
   Object.assign(panel.style, {
-    position: 'fixed', top: '60px', right: '12px',
-    width: '260px', height: '380px',
+    position: 'fixed', top: '60px', right: '12px', width: '260px', height: '380px',
     background: c.bg, color: c.fg, border: `1.5px solid ${c.border}`,
     zIndex: 9999998, fontFamily: 'Inter, Arial, sans-serif', fontSize: '12.5px',
-    borderRadius: '10px', overflowY: 'auto', resize: 'both',
-    boxSizing: 'border-box', paddingBottom: '10px',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
-    display: 'none'
+    borderRadius: '10px', overflowY: 'auto', resize: 'both', boxSizing: 'border-box',
+    paddingBottom: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.25)', display: 'none'
   });
 
   const header = document.createElement('div');
@@ -67,8 +65,9 @@
     <select id="bm_action">
       <option value="action_taken_moderators_24_hour_suspension">Kullanıcı 24 saat yasaklandı</option>
       <option value="action_taken_moderators_72_hour_suspension">Kullanıcı 72 saat yasaklandı</option>
-      <option value="action_taken_moderators_banned_the_user" selected>Kalıcı yasaklandı</option>
+      <option value="action_taken_moderators_banned_the_user" selected>Kalıcı yasaklandı</option> 
     </select>
+
     <label>İhlal Türü</label>
     <select id="bm_policy">
       <option value="benzerlik_spami" selected>Benzerlik Spamı</option>
@@ -92,13 +91,16 @@
       <option value="tehlikeli">Tehlikeli İçerik</option>
       <option value="other">Diğer</option>
     </select>
+
     <label>Market</label>
     <select id="bm_market">
       <option value="turkey_clone" selected>Türkiye</option>
     </select>
+
     <button id="bm_send">Gönder</button>
     <div id="bm_status"></div>
     <hr>
+
     <button id="bm_toggleTheme">🌓 Tema</button>
     <button id="bm_syncToggle">🔁 Senkron: ${autoSync ? "Açık" : "Kapalı"}</button>
   `;
@@ -116,9 +118,8 @@
     }
     #bm_send,#bm_toggleTheme,#bm_syncToggle{
       width:100%;padding:8px;margin-top:5px;
-      border:none;border-radius:6px;
-      cursor:pointer;font-weight:600;font-size:12.5px;
-      transition:background 0.2s ease;
+      border:none;border-radius:6px;cursor:pointer;
+      font-weight:600;font-size:12.5px;transition:background 0.2s ease;
     }
     #bm_status{margin-top:4px;font-family:monospace;font-size:11px;white-space:pre-wrap;}
     select,input,button{touch-action:manipulation;}
@@ -131,16 +132,20 @@
     panel.style.color = c.fg;
     panel.style.border = `1.5px solid ${c.border}`;
     header.style.background = c.header;
+
     document.querySelectorAll('#bm_user_link,#bm_action,#bm_policy,#bm_market').forEach(el => {
       el.style.background = c.inputBg;
       el.style.border = `1px solid ${c.inputBorder}`;
       el.style.color = c.fg;
     });
+
     const send = document.getElementById('bm_send');
     const theme = document.getElementById('bm_toggleTheme');
     const sync = document.getElementById('bm_syncToggle');
+
     send.style.background = c.accent;
     send.style.color = '#fff';
+
     [theme, sync].forEach(b => {
       b.style.background = c.btnBg;
       b.style.border = `1px solid ${c.btnBorder}`;
@@ -149,8 +154,11 @@
   };
 
   document.getElementById('bm_toggleTheme').addEventListener('click', () => {
-    isDarkMode = !isDarkMode; applyTheme(); savePrefs();
+    isDarkMode = !isDarkMode;
+    applyTheme();
+    savePrefs();
   });
+
   document.getElementById('bm_syncToggle').addEventListener('click', () => {
     autoSync = !autoSync;
     document.getElementById('bm_syncToggle').textContent = `🔁 Senkron: ${autoSync ? "Açık" : "Kapalı"}`;
@@ -162,24 +170,43 @@
   });
 
   let dragging = false, offsetX = 0, offsetY = 0;
-  header.addEventListener('mousedown', e => { dragging = true; offsetX = e.clientX - panel.offsetLeft; offsetY = e.clientY - panel.offsetTop; });
-  document.addEventListener('mousemove', e => { if (dragging) { panel.style.left = (e.clientX - offsetX) + 'px'; panel.style.top = (e.clientY - offsetY) + 'px'; } });
+  header.addEventListener('mousedown', e => {
+    dragging = true;
+    offsetX = e.clientX - panel.offsetLeft;
+    offsetY = e.clientY - panel.offsetTop;
+  });
+  document.addEventListener('mousemove', e => {
+    if (dragging) {
+      panel.style.left = (e.clientX - offsetX) + 'px';
+      panel.style.top = (e.clientY - offsetY) + 'px';
+    }
+  });
   document.addEventListener('mouseup', () => dragging = false);
 
   document.getElementById('bm_send').addEventListener('click', () => {
     const user = document.getElementById('bm_user_link').value.trim();
     if (!user) { alert('Kullanıcı linkini gir.'); return; }
+
     const base = 'https://brainly-trustandsafety.zendesk.com/hc/en-us/requests/new?ticket_form_id=9719157534610';
     const params = `&bm_user=${encodeURIComponent(user)}&bm_action=${encodeURIComponent(document.getElementById('bm_action').value)}&bm_policy=${encodeURIComponent(document.getElementById('bm_policy').value)}&bm_market=${encodeURIComponent(document.getElementById('bm_market').value)}`;
     const w = window.open(base + params, '_blank');
+
     const status = document.getElementById('bm_status');
-    if (!w) { status.textContent = '❌ Pop-up engellendi — izin verin.'; return; }
+    if (!w) {
+      status.textContent = '❌ Pop-up engellendi — izin verin.';
+      return;
+    }
+
     document.getElementById('bm_user_link').value = '';
     status.textContent = `✅ Gönderildi: ${user}`;
   });
 
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-    if (autoSync) { isDarkMode = e.matches; applyTheme(); savePrefs(); }
+    if (autoSync) {
+      isDarkMode = e.matches;
+      applyTheme();
+      savePrefs();
+    }
   });
 
   function detectProfileLink() {
@@ -189,6 +216,7 @@
     if (!input || !actionSelect) return;
 
     if (url.includes("/profil/")) input.value = url.split("?")[0];
+
     else if (url.includes("/bans/ban/")) {
       const id = url.match(/ban\/(\d+)/)?.[1];
       if (id) input.value = `https://eodev.com/profil/USER-${id}`;
@@ -198,36 +226,46 @@
     for (const li of listItems) {
       const text = li.textContent.trim();
       if (!text.startsWith("SORULAR:")) continue;
+
       const span = li.querySelector("span.orange");
       if (!span) continue;
+
       const value = span.textContent.trim();
       if (value.includes("24 saatliğine askıya al")) actionSelect.value = "action_taken_moderators_24_hour_suspension";
       else if (value.includes("72 saatliğine askıya al")) actionSelect.value = "action_taken_moderators_72_hour_suspension";
       else if (value.includes("Yasakla")) actionSelect.value = "action_taken_moderators_banned_the_user";
     }
   }
-  
+
   async function detectDurationFromLink(url) {
     try {
       const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
       const res = await fetch(proxyUrl);
       if (!res.ok) return;
+
       const html = await res.text();
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
+
       const listItems = doc.querySelectorAll("li");
       const actionSelect = document.getElementById('bm_action');
+
       for (const li of listItems) {
         const text = li.textContent.trim();
         if (!text.startsWith("SORULAR:")) continue;
+
         const span = li.querySelector("span.orange");
         if (!span) continue;
+
         const value = span.textContent.trim();
-        if (value.includes("24 saatliğine askıya al")) { actionSelect.value = "action_taken_moderators_24_hour_suspension"; return; }
-        if (value.includes("72 saatliğine askıya al")) { actionSelect.value = "action_taken_moderators_72_hour_suspension"; return; }
-        if (value.includes("Yasakla")) { actionSelect.value = "action_taken_moderators_banned_the_user"; return; }
+        if (value.includes("24 saatliğine askıya al")) return actionSelect.value = "action_taken_moderators_24_hour_suspension";
+        if (value.includes("72 saatliğine askıya al")) return actionSelect.value = "action_taken_moderators_72_hour_suspension";
+        if (value.includes("Yasakla")) return actionSelect.value = "action_taken_moderators_banned_the_user";
       }
-    } catch (e) { console.error("Proxy ile süre algılanamadı:", e); }
+
+    } catch (e) {
+      console.error("Proxy ile süre algılanamadı:", e);
+    }
   }
 
   document.getElementById('bm_user_link').addEventListener('change', e => {
@@ -236,9 +274,14 @@
   });
 
   window.addEventListener('load', () => setTimeout(detectProfileLink, 1000));
+
   let lastUrl = location.href;
   new MutationObserver(() => {
-    if (location.href !== lastUrl) { lastUrl = location.href; detectProfileLink(); }
+    if (location.href !== lastUrl) {
+      lastUrl = location.href;
+      detectProfileLink();
+    }
   }).observe(document, { subtree: true, childList: true });
 
   applyTheme();
+})();
