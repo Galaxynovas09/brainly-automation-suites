@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Brainly Moderation Panel PLUS5 (Background Submit v4.1)
+// @name         Brainly Moderation Panel PLUS5 
 // @namespace    http://tampermonkey.net/
 // @version      4.1
-// @description  Moderasyon paneli
+// @description  Moderasyon Paneli
 // @match        *://*/*
 // @grant        GM_xmlhttpRequest
 // @run-at       document-idle
