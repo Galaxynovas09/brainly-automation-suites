@@ -3,6 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      4.1
 // @description  Moderasyon paneli
+// @match        *://*/*
 // @grant        GM_xmlhttpRequest
 // @run-at       document-idle
 // @updateURL    https://github.com/Galaxynovas09/brainly-automation-suites/raw/refs/heads/main/panel.user.js
